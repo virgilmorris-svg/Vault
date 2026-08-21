@@ -1,0 +1,36 @@
+{
+  "summary": "Iteration 2 covers 3 reported bugs + 2 new features (Google Sign-In, encrypted attachments). Backend: 28/28 pytest cases passing including all new endpoints. Frontend: all new UI elements present and functional; Auto-lock 'Immediately' now works, attachment buttons render on entry screen, Google button visible on auth screen. Biometric toggle wired to code with Alert.alert path — verified via code review (browser Alert not asserted via automation).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/files/{file_id}", "issue": "After soft-delete (deleted:true), download still returns the blob (no deleted-flag filter in find_one). Consider filtering {deleted: {$ne: true}} for privacy correctness."},
+      {"endpoint": "DELETE /api/files/{file_id}", "issue": "Calling delete twice returns 200 both times (idempotent) — matched_count > 0 even when already deleted. Acceptable but consider distinguishing already-deleted."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": [
+      {"component": "settings-biometric", "issue": "Alert.alert('Biometrics unavailable') fires on browser preview per source code, but react-native-web renders it as an in-DOM overlay that Playwright's page.on('dialog') doesn't capture — verified by code inspection only. Manual/device test recommended."}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/backend_test.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "(Optional) Filter deleted files in GET /api/files/{file_id} to ensure soft-deleted media cannot be re-downloaded.",
+    "Recommend E1 manually smoke-test the biometric toggle on an actual iOS/Android device (browser cannot verify Expo LocalAuthentication path)."
+  ],
+  "critical_code_review_comments": [
+    "Google OAuth exchange properly rejects invalid session_ids (401) and creates user with 'u_'-prefixed id when new — consistent with regression contract.",
+    "PUT /api/user/kdf-salt correctly returns 409 when master password already established.",
+    "Files upload/download/delete flow works end-to-end with correct auth guard and 25MB size cap enforced server-side.",
+    "server.py is 431 lines — under the 700-line threshold; all endpoints validate via Pydantic bodies; _id excluded from responses."
+  ],
+  "updated_files": ["/app/backend/tests/backend_test.py"],
+  "success_rate": {"backend": "100% (28/28)", "frontend": "100% for verifiable flows (Google button, Auto-lock Immediately, attachment buttons); biometric verified via code review"},
+  "seed_data_creation": "Ephemeral test users created per test run using random emails prefixed 'test_' — no persistent seed data required.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend test file at /app/backend/tests/backend_test.py has 28 pytest cases across auth, vault, sessions, salt, google-session, kdf-salt, files, user-id-format. Reuse and extend. Frontend testIDs of interest: auth-google, tab-signup, auth-email, auth-account-password, auth-master, auth-master-confirm, auth-submit, settings-biometric, settings-autolock, autolock-0..autolock-30, add-entry-fab, att-add-image, att-add-video. Entry screen accessible at /entry/new (modal). Biometric Alert cannot be asserted via Playwright dialog listener on web preview.",
+  "rca_of_issue": "Iteration 1 bugs root causes (confirmed fixed in iteration 2): (1) Biometric toggle silent — original handler didn't Alert when hasHardware=false in web preview; now Alert.alert path added in settings.tsx L43. (2) Auto-lock Immediately silent — the '0' option's onPress previously coerced 0 as falsy and skipped setAutolock; verified fixed by row showing 'Immediately' after selection. (3) Google Sign-In added — auth screen shows 'Continue with Google' (testID auth-google) and backend /api/auth/google/session correctly rejects invalid sessions with 401. (4) Attachments added — entry/[id].tsx renders 'Encrypted attachments' section with Add image / Add video pressables, backend /api/files endpoints upload/download/delete verified end-to-end."
+}

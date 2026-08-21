@@ -1,0 +1,26 @@
+export const theme = {
+  color: {
+    surface: "#09090B",
+    onSurface: "#F4F4F5",
+    surfaceSecondary: "#18181B",
+    onSurfaceSecondary: "#D4D4D8",
+    surfaceTertiary: "#27272A",
+    onSurfaceTertiary: "#A1A1AA",
+    brand: "#F59E0B",
+    brandSecondary: "#D97706",
+    brandTertiary: "#45220A",
+    onBrand: "#1C1917",
+    success: "#10B981",
+    warning: "#F59E0B",
+    error: "#EF4444",
+    info: "#64748B",
+    border: "#27272A",
+    borderStrong: "#3F3F46",
+  },
+  space: { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 },
+  radius: { sm: 6, md: 12, lg: 16, pill: 999 },
+  font: {
+    display: "System",
+    text: "System",
+  },
+};

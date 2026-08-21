@@ -1,0 +1,186 @@
+{
+  "app_name": "SentinelPass",
+  "personality": "7 Dark-First Utility",
+  "personality_one_liner": "A highly functional, fast-scanning dark command center that prioritizes tactical clarity, biometric trust, and zero-friction security.",
+  "color": {
+    "surface": "#09090B",
+    "onSurface": "#F4F4F5",
+    "surfaceSecondary": "#18181B",
+    "onSurfaceSecondary": "#D4D4D8",
+    "surfaceTertiary": "#27272A",
+    "onSurfaceTertiary": "#A1A1AA",
+    "surfaceInverse": "#FAFAFA",
+    "onSurfaceInverse": "#09090B",
+    "brand": "#F59E0B",
+    "brandPrimary": "#F59E0B",
+    "onBrandPrimary": "#1C1917",
+    "brandSecondary": "#D97706",
+    "onBrandSecondary": "#FFFBEB",
+    "brandTertiary": "#45220A",
+    "onBrandTertiary": "#FDE68A",
+    "success": "#10B981",
+    "onSuccess": "#022C22",
+    "warning": "#F59E0B",
+    "onWarning": "#451A03",
+    "error": "#EF4444",
+    "onError": "#450A0A",
+    "info": "#64748B",
+    "onInfo": "#F8FAFC",
+    "border": "#27272A",
+    "borderStrong": "#3F3F46",
+    "divider": "#27272A"
+  },
+  "typography": {
+    "displayFontFamily": "Plus Jakarta Sans",
+    "textFontFamily": "Satoshi",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Dense and tactical. Use small spacing (sm/md) to pack information efficiently without clutter. Focus on alignment, structural dividers, and edge-to-edge lists.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 16,
+    "pill": 999
+  },
+  "shadow_tier": "0",
+  "navigation": "bottom_tabs",
+  "icon_set": "Phosphor",
+  "glassmorphism": {
+    "enabled": "true",
+    "do's": [
+      "Use subtle glass over surface base for the bottom tab bar and sticky top headers.",
+      "Use glass for the biometric unlock overlay to blur the underlying vault content."
+    ],
+    "dont's": [
+      "Do not use glass on list items, cards, or standard buttons. Keep them solid for tactical contrast."
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Onboarding & Auth",
+      "purpose": "Establish trust with a clean sign-in flow (email + master password) and introduce biometrics.",
+      "states": {
+        "loading": "Spinner overlaid on disabled form.",
+        "empty": "N/A",
+        "error": "Inline text in error color below the relevant input field."
+      },
+      "layout": "Hero abstract image at the top with a vertical gradient scrim fading to surface. Clear typography. Form fields use surfaceTertiary background. Primary CTA anchored at bottom."
+    },
+    {
+      "name": "Vault Lock",
+      "purpose": "A secure gate that demands biometric or master password authentication to reveal the app.",
+      "states": {
+        "loading": "Authenticating spinner inside the biometric button.",
+        "empty": "N/A",
+        "error": "Shake animation and red error text 'Authentication failed'."
+      },
+      "layout": "Full-screen absolute overlay with heavy blur hiding the app behind it. Centered FaceID/Fingerprint large icon button (brand tinted) with a 'Unlock Vault' label. Master password fallback link below."
+    },
+    {
+      "name": "Vault List",
+      "purpose": "Main command center showing all saved credentials, cards, and notes.",
+      "states": {
+        "loading": "Skeleton list items with shimmering effect.",
+        "empty": "Abstract minimal folder illustration, 'Your vault is empty', and a primary 'Add Item' button.",
+        "error": "Error message with a 'Retry Sync' button."
+      },
+      "layout": "Top sticky search bar (glass). Below it, a horizontally scrolling row of category chips (All, Logins, Cards, Notes) using brandTertiary for active states. Vertical list of credentials with real entity logos. Swipe left on items to reveal secondary actions (Copy Password, Delete). FAB pinned to bottom right for 'Add new'."
+    },
+    {
+      "name": "Add/Edit Entry",
+      "purpose": "Form to input credential details, heavily integrating the password generator.",
+      "states": {
+        "loading": "Saving spinner in header.",
+        "empty": "N/A",
+        "error": "Standard form validation inline."
+      },
+      "layout": "Single column form inside a KeyboardAvoidingView. Floating 'Save' button. Password input features an inline 'Generate' button that expands a bottom sheet containing the generator controls."
+    },
+    {
+      "name": "Password Generator",
+      "purpose": "Configurable generator giving real-time feedback on password strength.",
+      "states": {
+        "loading": "N/A",
+        "empty": "N/A",
+        "error": "N/A"
+      },
+      "layout": "Rendered as a Bottom Sheet. Top section displays the generated password in JetBrains Mono or a monospaced system font (large, easily readable). Circular or bar strength indicator. Below: Slider for length (8-64), toggle switches for Uppercase, Lowercase, Numbers, Symbols. Large 'Copy & Use' CTA at the bottom."
+    },
+    {
+      "name": "Security Dashboard",
+      "purpose": "Provides an actionable health score of the user's digital identity.",
+      "states": {
+        "loading": "Circular ring loading animation.",
+        "empty": "All green 'Your vault is 100% secure' illustration.",
+        "error": "Failed to analyze vault message."
+      },
+      "layout": "Hero section: Large circular progress ring showing the aggregate security score (0-100) colored by status (success/warning/error). Below: actionable list cards categorized into 'Compromised', 'Reused', and 'Weak' passwords. Each card leads to a detailed list."
+    },
+    {
+      "name": "Settings",
+      "purpose": "Control center for vault behavior, security timers, and syncing.",
+      "states": {
+        "loading": "N/A",
+        "empty": "N/A",
+        "error": "N/A"
+      },
+      "layout": "Standard categorized list layout. Sections for Security (Auto-lock timer, Biometric toggle), Account (Master password, Devices), and Data (Export/Import)."
+    }
+  ],
+  "images": {
+    "onboarding_hero": {
+      "url": "https://images.unsplash.com/photo-1727174432128-9311917465bf?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2OTF8MHwxfHNlYXJjaHwzfHxkYXJrJTIwbW9kZXJuJTIwc2VjdXJpdHklMjB2YXVsdCUyMG1vYmlsZSUyMGFwcCUyMGFic3RyYWN0fGVufDB8fHx8MTc4NjkzODQwMHww&ixlib=rb-4.1.0&q=85",
+      "alt": "Abstract dark safe box representing the secure vault."
+    },
+    "vault_empty_state": {
+      "url": "https://images.unsplash.com/photo-1709625862266-014ef072fd93?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTZ8MHwxfHNlYXJjaHwxfHxlbXB0eSUyMGZvbGRlciUyMGRhcmslMjBtaW5pbWFsJTIwYWJzdHJhY3R8ZW58MHx8fHwxNzg2OTM4NDAwfDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Minimal dark abstract shapes representing an empty state."
+    }
+  },
+  "haptics": {
+    "tab_press": "light",
+    "biometric_success": "success",
+    "biometric_error": "error",
+    "copy_password": "success",
+    "generator_slider_move": "selection",
+    "generator_toggle": "light",
+    "save_entry": "medium"
+  },
+  "instructions_to_main_agent": [
+    "SECURITY THEME: Strictly adhere to the '7 Dark-First Utility' personality. Use deep obsidian (#09090B) for the background to save OLED battery and minimize eye strain. Avoid ALL blues/purples. Use Amber (#F59E0B) as the primary brand accent and Emerald (#10B981) for success/strong passwords.",
+    "TYPOGRAPHY FOR PASSWORDS: For displaying generated passwords and passcodes, use a monospace font (like JetBrains Mono, Space Mono, or Platform.OS === 'ios' ? 'Courier New' : 'monospace') to ensure 'l', 'I', '1', and 'O', '0' are distinguishable.",
+    "LIST ENTITIES LOGOS (MANDATORY): When rendering the Vault List, you MUST use `image_selector_tool` to fetch real logos for branded entities (e.g., 'Netflix logo png', 'Apple logo transparent'). Do not default to initials or generic icons. Use a surfaceTertiary tinted square as a fallback only if the fetch fails.",
+    "GENERATOR UX: The password generator must provide real-time updates as sliders/toggles change. Connect these to haptics ('selection' for slider ticks).",
+    "BIOMETRIC BLUR: When the app requires biometric unlock (Vault Lock screen), apply a heavy blur over the root navigation using `expo-blur` or `expo-glass-effect` so underlying vault data is completely obscured.",
+    "DASHBOARD LAYOUT: Design the Security Dashboard around a central circular progress ring for the aggregate score. Use the status tokens (success/warning/error) dynamically based on the score.",
+    "GESTURES & ACTIONS: Implement swipeable list items in the vault for quick actions (Copy Password, Delete). Include an inline masked reveal toggle (eye icon) for password fields.",
+    "NO EMOJIS: Zero tolerance for emojis in the system UI. Use Phosphor icons exclusively."
+  ]
+}
