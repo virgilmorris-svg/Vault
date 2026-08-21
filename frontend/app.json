@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "frontend",
+    "name": "VauLt",
     "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -39,13 +39,13 @@
       [
         "expo-secure-store",
         {
-          "faceIDPermission": "Unlock your SentinelPass vault"
+          "faceIDPermission": "Unlock your VauLt vault"
         }
       ],
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Unlock your SentinelPass vault"
+          "faceIDPermission": "Unlock your VauLt vault"
         }
       ],
       [

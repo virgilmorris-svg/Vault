@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Pressable, ScrollView, Switch, Alert } from "react-native";
+import { View, Text, StyleSheet, Pressable, ScrollView, Switch, Alert, Share, Platform } from "react-native";
 import * as LocalAuthentication from "expo-local-authentication";
 import * as Clipboard from "expo-clipboard";
 import { Feather } from "@expo/vector-icons";
@@ -83,6 +83,27 @@ export default function SettingsScreen() {
     }
   };
 
+  const inviteFriends = async () => {
+    const appUrl = process.env.EXPO_PUBLIC_BACKEND_URL || "https://vault.emergent.host";
+    const message = `Try VauLt — a zero-knowledge password manager. Each account stays private and end-to-end encrypted. ${appUrl}`;
+    try {
+      if (Platform.OS === "web") {
+        // @ts-ignore
+        if (navigator.share) {
+          // @ts-ignore
+          await navigator.share({ title: "VauLt", text: message, url: appUrl });
+        } else {
+          await Clipboard.setStringAsync(message);
+          Alert.alert("Invite copied", "Share link copied to clipboard.");
+        }
+      } else {
+        await Share.share({ message, url: appUrl, title: "VauLt" });
+      }
+    } catch (e: any) {
+      // user dismissed
+    }
+  };
+
   return (
     <SafeAreaView style={styles.c} edges={["top"]}>
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
@@ -124,6 +145,11 @@ export default function SettingsScreen() {
           )}
         </Section>
 
+        <Section title="Share">
+          <Row icon="share-2" label="Invite friends & family" onPress={inviteFriends} testID="settings-invite" />
+          <Text style={styles.hint}>Each person gets their own private, end-to-end encrypted vault. Accounts are fully isolated.</Text>
+        </Section>
+
         <Section title="Data">
           <Row
             icon="download"
@@ -155,7 +181,7 @@ export default function SettingsScreen() {
         </Section>
 
         <Text style={styles.footer}>
-          SentinelPass · Zero-knowledge · End-to-end encrypted
+          VauLt · Zero-knowledge · End-to-end encrypted{"\n"}Made by V.
         </Text>
       </ScrollView>
     </SafeAreaView>

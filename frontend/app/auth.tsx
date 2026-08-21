@@ -145,8 +145,9 @@ export default function AuthScreen() {
             <View style={styles.logo}>
               <Feather name="shield" size={32} color={theme.color.brand} />
             </View>
-            <Text style={styles.brand}>SentinelPass</Text>
+            <Text style={styles.brand}>VauLt</Text>
             <Text style={styles.tagline}>Zero-knowledge password vault</Text>
+            <Text style={styles.credit}>Made by V.</Text>
           </View>
         </View>
 
@@ -286,6 +287,7 @@ const styles = StyleSheet.create({
   },
   brand: { color: theme.color.onSurface, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
   tagline: { color: theme.color.onSurfaceSecondary, fontSize: 14, marginTop: 4 },
+  credit: { color: theme.color.brand, fontSize: 12, fontWeight: "700", marginTop: 8, letterSpacing: 1 },
   form: { padding: 24, paddingBottom: 48 },
   tabs: {
     flexDirection: "row",
