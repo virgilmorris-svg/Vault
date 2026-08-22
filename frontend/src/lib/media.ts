@@ -36,15 +36,25 @@ export type MediaAttachment = {
   created_at: string;
 };
 
-export async function pickAndUpload(keys: KeyMaterial, kind: MediaKind): Promise<MediaAttachment | null> {
-  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!perm.granted) throw new Error("Media library permission is required");
-
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: kind === "image" ? ["images"] : ["videos"],
-    quality: 0.8,
-    allowsEditing: false,
-  });
+export async function pickAndUpload(keys: KeyMaterial, kind: MediaKind, source: "gallery" | "camera" = "gallery"): Promise<MediaAttachment | null> {
+  let result: ImagePicker.ImagePickerResult;
+  if (source === "camera") {
+    const perm = await ImagePicker.requestCameraPermissionsAsync();
+    if (!perm.granted) throw new Error("Camera permission is required");
+    result = await ImagePicker.launchCameraAsync({
+      mediaTypes: kind === "image" ? ["images"] : ["videos"],
+      quality: 0.8,
+      allowsEditing: false,
+    });
+  } else {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) throw new Error("Media library permission is required");
+    result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: kind === "image" ? ["images"] : ["videos"],
+      quality: 0.8,
+      allowsEditing: false,
+    });
+  }
   if (result.canceled || !result.assets?.[0]) return null;
 
   const asset = result.assets[0];

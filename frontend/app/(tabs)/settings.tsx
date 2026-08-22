@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import { useVault } from "@/src/lib/vault";
 import { theme } from "@/src/lib/theme";
 import { sessionsApi } from "@/src/lib/api";
+import { InfoModal } from "@/src/components/InfoModal";
 
 const AUTOLOCK_OPTIONS = [
   { label: "Immediately", value: 0 },
@@ -20,49 +21,89 @@ const AUTOLOCK_OPTIONS = [
 export default function SettingsScreen() {
   const router = useRouter();
   const vault = useVault();
-  const { user, autolockMinutes, setAutolock, biometricEnabled, setBiometricEnabled, lock, logout, exportEncrypted } = vault as any;
+  const { user, autolockMinutes, setAutolock, biometricEnabled, setBiometricEnabled, lock, logout, exportEncrypted, keys } = vault as any;
   const [hasBio, setHasBio] = useState(false);
+  const [bioTypes, setBioTypes] = useState<string>("");
   const [sessions, setSessions] = useState<any[]>([]);
   const [showAutolock, setShowAutolock] = useState(false);
   const [exported, setExported] = useState<string | null>(null);
+  const [modal, setModal] = useState<{ visible: boolean; title: string; message: string; kind: "success" | "error" | "info" }>({ visible: false, title: "", message: "", kind: "info" });
+  const [bioBusy, setBioBusy] = useState(false);
+
+  const showModal = (title: string, message: string, kind: "success" | "error" | "info" = "info") =>
+    setModal({ visible: true, title, message, kind });
 
   useEffect(() => {
     (async () => {
       const hw = await LocalAuthentication.hasHardwareAsync();
       const enrolled = await LocalAuthentication.isEnrolledAsync();
       setHasBio(hw && enrolled);
+      try {
+        const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
+        const labels: string[] = [];
+        for (const t of types) {
+          if (t === LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION) labels.push("Face ID");
+          else if (t === LocalAuthentication.AuthenticationType.FINGERPRINT) labels.push("Fingerprint");
+          else if (t === LocalAuthentication.AuthenticationType.IRIS) labels.push("Iris");
+        }
+        setBioTypes(labels.join(" · ") || (hw ? "Available" : "Unavailable"));
+      } catch {}
       try { setSessions(await sessionsApi.list()); } catch {}
     })();
   }, []);
 
-  const toggleBio = async (v: boolean) => {
-    if (v) {
-      if (!hasBio) {
-        Alert.alert(
-          "Biometrics unavailable",
-          "This device or browser has no biometric hardware enrolled. On the web preview, biometric unlock is not supported — try on an iOS/Android device."
+  const enableBiometric = async () => {
+    if (bioBusy) return;
+    setBioBusy(true);
+    try {
+      if (Platform.OS === "web") {
+        showModal(
+          "Not available in browser",
+          "Biometric unlock requires a real iOS or Android device. Scan the QR code from the preview to test in Expo Go, or generate a build to use Face ID / fingerprint.",
+          "info"
         );
         return;
       }
-      // Authenticate FIRST before enabling — proves the user has permission
-      try {
-        const r = await LocalAuthentication.authenticateAsync({
-          promptMessage: "Confirm to enable biometric unlock",
-          fallbackLabel: "Use master password",
-        });
-        if (!r.success) {
-          Alert.alert("Not enabled", "Biometric authentication was not confirmed.");
-          return;
-        }
-      } catch (e: any) {
-        Alert.alert("Error", e.message || "Failed to authenticate");
+      const hw = await LocalAuthentication.hasHardwareAsync();
+      if (!hw) {
+        showModal("No biometric hardware", "This device has no fingerprint or facial recognition sensor.", "error");
+        return;
+      }
+      const enrolled = await LocalAuthentication.isEnrolledAsync();
+      if (!enrolled) {
+        showModal(
+          "No biometrics enrolled",
+          "Add a fingerprint or Face ID in your device settings, then come back to enable biometric unlock.",
+          "error"
+        );
+        return;
+      }
+      if (!keys) {
+        showModal("Vault locked", "Please unlock the vault first, then try again.", "error");
+        return;
+      }
+      const r = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Confirm to enable biometric unlock for VauLt",
+        fallbackLabel: "Cancel",
+        cancelLabel: "Cancel",
+        disableDeviceFallback: false,
+      });
+      if (!r.success) {
+        showModal("Not enabled", `Biometric authentication was not confirmed${(r as any).error ? ` (${(r as any).error})` : ""}.`, "error");
         return;
       }
       await setBiometricEnabled(true);
-      Alert.alert("Enabled", "You can now unlock your vault with biometrics.");
-    } else {
-      await setBiometricEnabled(false);
+      showModal("Biometric unlock enabled", "You can now unlock your vault with " + (bioTypes || "biometrics") + ".", "success");
+    } catch (e: any) {
+      showModal("Error", e?.message || "Failed to enable biometrics", "error");
+    } finally {
+      setBioBusy(false);
     }
+  };
+
+  const disableBiometric = async () => {
+    await setBiometricEnabled(false);
+    showModal("Biometric unlock disabled", "You'll need your master password to unlock the vault.", "info");
   };
 
   const revoke = async (id: string) => {
@@ -114,13 +155,39 @@ export default function SettingsScreen() {
 
         <Section title="Security">
           <Row icon="lock" label="Lock now" onPress={lock} testID="settings-lock-now" />
-          <RowSwitch
-            icon="unlock"
-            label="Unlock with biometrics"
-            value={biometricEnabled}
-            onChange={toggleBio}
-            testID="settings-biometric"
-          />
+          <View style={styles.bioCard} testID="settings-biometric">
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <View style={[styles.bioIcon, { borderColor: biometricEnabled ? theme.color.success : theme.color.border, backgroundColor: (biometricEnabled ? theme.color.success : theme.color.brand) + "22" }]}>
+                <Feather name={biometricEnabled ? "check" : "unlock"} size={18} color={biometricEnabled ? theme.color.success : theme.color.brand} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.bioLabel}>Biometric unlock</Text>
+                <Text style={styles.bioStatus}>
+                  {Platform.OS === "web"
+                    ? "Not available in browser preview"
+                    : biometricEnabled
+                    ? `Enabled · ${bioTypes || "biometric"}`
+                    : hasBio
+                    ? `Available · ${bioTypes}`
+                    : "No biometrics enrolled on this device"}
+                </Text>
+              </View>
+            </View>
+            <Pressable
+              testID="biometric-action-btn"
+              onPress={biometricEnabled ? disableBiometric : enableBiometric}
+              disabled={bioBusy}
+              style={({ pressed }) => [
+                styles.bioBtn,
+                { backgroundColor: biometricEnabled ? theme.color.surfaceTertiary : theme.color.brand },
+                (pressed || bioBusy) && { opacity: 0.75 },
+              ]}
+            >
+              <Text style={[styles.bioBtnText, { color: biometricEnabled ? theme.color.error : theme.color.onBrand }]}>
+                {bioBusy ? "…" : biometricEnabled ? "Disable" : "Enable biometric unlock"}
+              </Text>
+            </Pressable>
+          </View>
           <Row
             icon="clock"
             label="Auto-lock"
@@ -184,6 +251,14 @@ export default function SettingsScreen() {
           VauLt · Zero-knowledge · End-to-end encrypted{"\n"}Made by V.
         </Text>
       </ScrollView>
+
+      <InfoModal
+        visible={modal.visible}
+        title={modal.title}
+        message={modal.message}
+        kind={modal.kind}
+        onClose={() => setModal((m) => ({ ...m, visible: false }))}
+      />
     </SafeAreaView>
   );
 }
@@ -257,4 +332,12 @@ const styles = StyleSheet.create({
   revokeBtn: { paddingHorizontal: 12, paddingVertical: 6, backgroundColor: theme.color.surfaceTertiary, borderRadius: 8 },
   revokeText: { color: theme.color.error, fontWeight: "600", fontSize: 12 },
   footer: { color: theme.color.onSurfaceTertiary, fontSize: 11, textAlign: "center", marginTop: 32 },
+  bioCard: {
+    padding: 14, borderBottomWidth: 1, borderBottomColor: theme.color.border,
+  },
+  bioIcon: { width: 40, height: 40, borderRadius: 10, borderWidth: 1, alignItems: "center", justifyContent: "center" },
+  bioLabel: { color: theme.color.onSurface, fontSize: 14, fontWeight: "700" },
+  bioStatus: { color: theme.color.onSurfaceTertiary, fontSize: 12, marginTop: 2 },
+  bioBtn: { marginTop: 12, paddingVertical: 12, borderRadius: 10, alignItems: "center" },
+  bioBtnText: { fontSize: 14, fontWeight: "700" },
 });

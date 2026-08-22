@@ -290,3 +290,36 @@ class TestUserIdFormat:
     def test_user_id_is_u_prefixed(self, registered_user):
         uid = registered_user["user"].get("user_id") or registered_user["user"].get("id")
         assert uid and uid.startswith("u_"), f"user_id format unexpected: {uid}"
+
+
+# ---- Breach check (HIBP k-anonymity) ----
+class TestBreachCheck:
+    def test_breach_requires_auth(self, client):
+        r = client.post(f"{API}/breach/check", json={"prefix": "5BAA6"})
+        assert r.status_code == 401
+
+    def test_breach_valid_prefix_returns_suffixes(self, client, registered_user):
+        headers = {"Authorization": f"Bearer {registered_user['access_token']}"}
+        r = client.post(f"{API}/breach/check", headers=headers, json={"prefix": "5BAA6"})
+        assert r.status_code == 200, f"breach check failed: {r.status_code} {r.text}"
+        data = r.json()
+        assert "suffixes" in data
+        assert isinstance(data["suffixes"], str)
+        # HIBP returns lines "SUFFIX:count" — SHA1("password") = 5BAA61E4C9B93F3F0682250B6CF8331B7EE68FD8
+        assert "1E4C9B93F3F0682250B6CF8331B7EE68FD8" in data["suffixes"].upper()
+        assert ":" in data["suffixes"]  # SUFFIX:count format
+
+    def test_breach_lowercase_prefix_accepted(self, client, registered_user):
+        headers = {"Authorization": f"Bearer {registered_user['access_token']}"}
+        r = client.post(f"{API}/breach/check", headers=headers, json={"prefix": "5baa6"})
+        assert r.status_code == 200
+
+    def test_breach_bad_prefix_length(self, client, registered_user):
+        headers = {"Authorization": f"Bearer {registered_user['access_token']}"}
+        r = client.post(f"{API}/breach/check", headers=headers, json={"prefix": "5BAA"})
+        assert r.status_code == 400
+
+    def test_breach_non_hex_prefix(self, client, registered_user):
+        headers = {"Authorization": f"Bearer {registered_user['access_token']}"}
+        r = client.post(f"{API}/breach/check", headers=headers, json={"prefix": "ZZZZZ"})
+        assert r.status_code == 400

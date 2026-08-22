@@ -52,7 +52,8 @@
         "expo-image-picker",
         {
           "photosPermission": "Attach photos to your encrypted vault entries",
-          "cameraPermission": "Capture photos for your encrypted vault entries"
+          "cameraPermission": "Capture photos and videos for your encrypted vault entries",
+          "microphonePermission": "Record videos with sound for your encrypted vault entries"
         }
       ]
     ],

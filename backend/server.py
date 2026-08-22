@@ -419,6 +419,35 @@ async def get_salt(email: EmailStr):
     return {"kdf_salt": u["kdf_salt"], "needs_setup": False}
 
 
+# ---- Breach check (HaveIBeenPwned k-anonymity) ----
+class BreachCheckBody(BaseModel):
+    prefix: str  # 5-char SHA-1 hex prefix (client-computed)
+
+
+@api.post("/breach/check")
+async def breach_check(body: BreachCheckBody, user_id: str = Depends(current_user_id)):
+    """K-anonymity breach lookup. Client sends only the first 5 SHA-1 hex chars.
+    We return the list of suffixes+counts from HIBP; the client matches locally.
+    """
+    prefix = (body.prefix or "").strip().upper()
+    if len(prefix) != 5 or not all(c in "0123456789ABCDEF" for c in prefix):
+        raise HTTPException(400, "Invalid prefix — must be 5 hex chars")
+    try:
+        async with httpx.AsyncClient(timeout=10) as c:
+            r = await c.get(
+                f"https://api.pwnedpasswords.com/range/{prefix}",
+                headers={"Add-Padding": "true", "User-Agent": "VauLt-App"},
+            )
+        if r.status_code != 200:
+            raise HTTPException(502, "Breach service unavailable")
+        # Response is text: SUFFIX:count per line
+        return {"suffixes": r.text}
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(502, "Breach service unavailable")
+
+
 app.include_router(api)
 
 app.add_middleware(

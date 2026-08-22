@@ -143,7 +143,11 @@ export default function AuthScreen() {
           />
           <View style={styles.heroContent}>
             <View style={styles.logo}>
-              <Feather name="shield" size={32} color={theme.color.brand} />
+              <Image
+                source={require("../assets/images/icon.png")}
+                style={{ width: 56, height: 56 }}
+                contentFit="cover"
+              />
             </View>
             <Text style={styles.brand}>VauLt</Text>
             <Text style={styles.tagline}>Zero-knowledge password vault</Text>
@@ -281,9 +285,8 @@ const styles = StyleSheet.create({
   heroContent: { flex: 1, alignItems: "flex-start", justifyContent: "flex-end", padding: 24 },
   logo: {
     width: 56, height: 56, borderRadius: 16,
-    backgroundColor: "rgba(245,158,11,0.15)",
-    alignItems: "center", justifyContent: "center", marginBottom: 12,
-    borderWidth: 1, borderColor: "rgba(245,158,11,0.4)",
+    marginBottom: 12,
+    overflow: "hidden",
   },
   brand: { color: theme.color.onSurface, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
   tagline: { color: theme.color.onSurfaceSecondary, fontSize: 14, marginTop: 4 },

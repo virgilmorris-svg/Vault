@@ -49,11 +49,11 @@ export default function EntryScreen() {
   const [uploading, setUploading] = useState(false);
   const vaultCtx = useVault() as any;
 
-  const uploadMedia = async (kind: "image" | "video") => {
+  const uploadMedia = async (kind: "image" | "video", source: "gallery" | "camera" = "gallery") => {
     if (!vaultCtx.keys) return;
     setUploading(true);
     try {
-      const att = await pickAndUpload(vaultCtx.keys, kind);
+      const att = await pickAndUpload(vaultCtx.keys, kind, source);
       if (att) setAttachments((a: any) => [...a, att]);
     } catch (e: any) {
       Alert.alert("Upload failed", e.message);
@@ -239,14 +239,22 @@ export default function EntryScreen() {
                 </Pressable>
               </View>
             ))}
-            <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
-              <Pressable onPress={() => uploadMedia("image")} disabled={uploading} style={styles.attAdd} testID="att-add-image">
-                <Feather name="image" size={16} color={theme.color.brand} />
-                <Text style={styles.attAddText}>{uploading ? "Uploading…" : "Add image"}</Text>
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
+              <Pressable onPress={() => uploadMedia("image", "camera")} disabled={uploading} style={styles.attAdd} testID="att-capture-photo">
+                <Feather name="camera" size={16} color={theme.color.brand} />
+                <Text style={styles.attAddText}>Take photo</Text>
               </Pressable>
-              <Pressable onPress={() => uploadMedia("video")} disabled={uploading} style={styles.attAdd} testID="att-add-video">
+              <Pressable onPress={() => uploadMedia("image", "gallery")} disabled={uploading} style={styles.attAdd} testID="att-add-image">
+                <Feather name="image" size={16} color={theme.color.brand} />
+                <Text style={styles.attAddText}>{uploading ? "Uploading…" : "Gallery"}</Text>
+              </Pressable>
+              <Pressable onPress={() => uploadMedia("video", "camera")} disabled={uploading} style={styles.attAdd} testID="att-capture-video">
                 <Feather name="video" size={16} color={theme.color.brand} />
-                <Text style={styles.attAddText}>Add video</Text>
+                <Text style={styles.attAddText}>Record</Text>
+              </Pressable>
+              <Pressable onPress={() => uploadMedia("video", "gallery")} disabled={uploading} style={styles.attAdd} testID="att-add-video">
+                <Feather name="film" size={16} color={theme.color.brand} />
+                <Text style={styles.attAddText}>Video</Text>
               </Pressable>
             </View>
             <Text style={styles.attHint}>Media is encrypted on this device before upload. Only you can decrypt it.</Text>
@@ -472,7 +480,7 @@ const styles = StyleSheet.create({
   attRow: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: theme.color.surfaceSecondary, borderWidth: 1, borderColor: theme.color.border, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10 },
   attName: { flex: 1, color: theme.color.onSurface, fontSize: 13 },
   attBtn: { padding: 6, backgroundColor: theme.color.surfaceTertiary, borderRadius: 6 },
-  attAdd: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 12, borderRadius: 10, backgroundColor: theme.color.surfaceSecondary, borderWidth: 1, borderColor: theme.color.border },
+  attAdd: { minWidth: 90, flexGrow: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 12, paddingHorizontal: 12, borderRadius: 10, backgroundColor: theme.color.surfaceSecondary, borderWidth: 1, borderColor: theme.color.border },
   attAddText: { color: theme.color.onSurface, fontSize: 13, fontWeight: "600" },
   attHint: { color: theme.color.onSurfaceTertiary, fontSize: 11, marginTop: 4 },
 });
