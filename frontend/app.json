@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "frontend",
+    "scheme": "vault",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -55,7 +55,8 @@
           "cameraPermission": "Capture photos and videos for your encrypted vault entries",
           "microphonePermission": "Record videos with sound for your encrypted vault entries"
         }
-      ]
+      ],
+      "./plugins/withVauLtExtensions.js"
     ],
     "experiments": {
       "typedRoutes": true

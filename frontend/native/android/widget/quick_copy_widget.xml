@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#09090B"
+    android:padding="10dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="VauLt · Quick Copy"
+        android:textColor="#38BDF8"
+        android:textStyle="bold"
+        android:textSize="11sp"
+        android:paddingBottom="6dp" />
+
+    <LinearLayout android:id="@+id/row_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="6dp" android:background="#18181B"
+        android:layout_marginBottom="4dp">
+        <TextView android:id="@+id/title_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="#F4F4F5" android:textSize="12sp" android:textStyle="bold" android:singleLine="true"/>
+        <TextView android:id="@+id/sub_1" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="#A1A1AA" android:textSize="10sp" android:singleLine="true"/>
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/row_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="6dp" android:background="#18181B"
+        android:layout_marginBottom="4dp">
+        <TextView android:id="@+id/title_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="#F4F4F5" android:textSize="12sp" android:textStyle="bold" android:singleLine="true"/>
+        <TextView android:id="@+id/sub_2" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="#A1A1AA" android:textSize="10sp" android:singleLine="true"/>
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/row_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="6dp" android:background="#18181B">
+        <TextView android:id="@+id/title_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="#F4F4F5" android:textSize="12sp" android:textStyle="bold" android:singleLine="true"/>
+        <TextView android:id="@+id/sub_3" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textColor="#A1A1AA" android:textSize="10sp" android:singleLine="true"/>
+    </LinearLayout>
+</LinearLayout>

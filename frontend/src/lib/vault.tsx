@@ -286,6 +286,11 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
     }
     await secure.set(K.VAULT_LOCAL, blob);
     await secure.set(K.VAULT_VERSION, String(nextV));
+    // Sync redacted stubs to native shared storage (widget/autofill).
+    try {
+      const { syncEntriesToNativeSharedStorage } = require("./nativeShared");
+      await syncEntriesToNativeSharedStorage(vault.entries);
+    } catch {}
     setState((s) => ({ ...s, vault, version: nextV }));
   }, []);
 

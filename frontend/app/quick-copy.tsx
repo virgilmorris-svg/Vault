@@ -9,12 +9,13 @@ import * as Clipboard from "expo-clipboard";
 import * as Haptics from "expo-haptics";
 import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useVault } from "@/src/lib/vault";
 import { theme } from "@/src/lib/theme";
 
 export default function QuickCopyScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ domain?: string; entry_id?: string }>();
   const vault = useVault();
   const [unlocked, setUnlocked] = useState(false);
   const [attempted, setAttempted] = useState(false);
@@ -41,6 +42,15 @@ export default function QuickCopyScreen() {
     })();
   }, []);
 
+  useEffect(() => {
+    // Auto-copy if entry_id supplied (widget tap deep-link)
+    if (unlocked && params.entry_id && vault.vault) {
+      const e = vault.vault.entries.find((x) => x.id === params.entry_id);
+      if (e?.password) copy(e.id, e.password);
+    }
+    // eslint-disable-next-line
+  }, [unlocked, params.entry_id]);
+
   const copy = async (id: string, pw?: string) => {
     if (!pw) return;
     await Clipboard.setStringAsync(pw);
@@ -48,8 +58,16 @@ export default function QuickCopyScreen() {
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 1500);
   };
-
-  const logins = (vault.vault?.entries || []).filter((e) => e.category === "login" && e.password);
+  const logins = (vault.vault?.entries || []).filter((e) => {
+    if (e.category !== "login" || !e.password) return false;
+    if (params.domain) {
+      const d = String(params.domain).toLowerCase();
+      const url = (e.url || "").toLowerCase();
+      const title = (e.title || "").toLowerCase();
+      return url.includes(d) || title.includes(d);
+    }
+    return true;
+  });
 
   return (
     <SafeAreaView style={styles.c} edges={["top"]}>
@@ -62,8 +80,10 @@ export default function QuickCopyScreen() {
       </View>
 
       <View style={styles.tagline}>
-        <Feather name="zap" size={14} color={theme.color.brand} />
-        <Text style={styles.taglineText}>Tap a login. Password copied. Done.</Text>
+        <Feather name={params.domain ? "target" : "zap"} size={14} color={theme.color.brand} />
+        <Text style={styles.taglineText}>
+          {params.domain ? `Autofill for ${params.domain}` : "Tap a login. Password copied. Done."}
+        </Text>
       </View>
 
       {!attempted ? (

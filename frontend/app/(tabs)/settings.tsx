@@ -224,6 +224,29 @@ export default function SettingsScreen() {
           </Text>
         </Section>
 
+        <Section title="Home-Screen Widget & Autofill">
+          <View style={styles.extInfo} testID="extensions-info">
+            <View style={styles.extRow}>
+              <Feather name="grid" size={16} color={theme.color.brand} />
+              <Text style={styles.extLabel}>Home-screen widget</Text>
+              <Text style={styles.extStatus}>Requires build</Text>
+            </View>
+            <View style={styles.extRow}>
+              <Feather name="edit-3" size={16} color={theme.color.brand} />
+              <Text style={styles.extLabel}>System autofill provider</Text>
+              <Text style={styles.extStatus}>Requires build</Text>
+            </View>
+            <Text style={styles.hint}>
+              Both features are scaffolded and will be included in your next native build. To activate:{"\n\n"}
+              1. Tap Publish (top-right){"\n"}
+              2. Generate iOS and/or Android build{"\n"}
+              3. Install on your device{"\n\n"}
+              On iOS: long-press home screen → Add Widget → VauLt. For autofill: Settings → Passwords → AutoFill Passwords → enable VauLt.{"\n\n"}
+              On Android: long-press home screen → Widgets → VauLt. For autofill: Settings → System → Languages & input → Autofill service → VauLt.
+            </Text>
+          </View>
+        </Section>
+
         <Section title="Data">
           <Row
             icon="download"
@@ -347,4 +370,11 @@ const styles = StyleSheet.create({
   bioStatus: { color: theme.color.onSurfaceTertiary, fontSize: 12, marginTop: 2 },
   bioBtn: { marginTop: 12, paddingVertical: 12, borderRadius: 10, alignItems: "center" },
   bioBtnText: { fontSize: 14, fontWeight: "700" },
+  extInfo: { padding: 14 },
+  extRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8 },
+  extLabel: { color: theme.color.onSurface, fontSize: 14, flex: 1 },
+  extStatus: {
+    color: theme.color.warning, fontSize: 11, fontWeight: "700",
+    backgroundColor: theme.color.warning + "22", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6,
+  },
 });
