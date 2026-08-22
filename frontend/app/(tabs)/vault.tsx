@@ -51,7 +51,17 @@ export default function VaultScreen() {
     <SafeAreaView style={styles.c} edges={["top"]}>
       <View style={styles.header}>
         <Text style={styles.title}>Vault</Text>
-        <Text style={styles.count}>{entries.length} items</Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <Pressable
+            testID="header-quick-copy"
+            onPress={() => router.push("/quick-copy")}
+            style={styles.quickBtn}
+          >
+            <Feather name="zap" size={14} color={theme.color.brand} />
+            <Text style={styles.quickText}>Quick Copy</Text>
+          </Pressable>
+          <Text style={styles.count}>{entries.length} items</Text>
+        </View>
       </View>
 
       <View style={styles.searchWrap}>
@@ -147,6 +157,12 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8, flexDirection: "row", alignItems: "baseline", justifyContent: "space-between" },
   title: { color: theme.color.onSurface, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
   count: { color: theme.color.onSurfaceTertiary, fontSize: 13 },
+  quickBtn: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999,
+    backgroundColor: theme.color.brand + "22", borderWidth: 1, borderColor: theme.color.brand + "55",
+  },
+  quickText: { color: theme.color.brand, fontSize: 11, fontWeight: "700" },
   searchWrap: {
     marginHorizontal: 16, marginTop: 8, marginBottom: 8,
     flexDirection: "row", alignItems: "center",

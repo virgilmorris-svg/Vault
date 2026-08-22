@@ -1,11 +1,12 @@
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
-import { LogBox } from "react-native";
+import { useEffect, useState } from "react";
+import { LogBox, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { useIconFonts } from "@/src/hooks/use-icon-fonts";
 import { VaultProvider } from "@/src/lib/vault";
+import { AnimatedSplash } from "@/src/components/AnimatedSplash";
 
 
 LogBox.ignoreAllLogs(true);
@@ -13,6 +14,7 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useIconFonts();
+  const [splashDone, setSplashDone] = useState(false);
 
   useEffect(() => {
     if (loaded || error) {
@@ -26,6 +28,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#09090B" }}>
       <VaultProvider>
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#09090B" } }} />
+        {!splashDone && <AnimatedSplash onDone={() => setSplashDone(true)} />}
       </VaultProvider>
     </GestureHandlerRootView>
   );

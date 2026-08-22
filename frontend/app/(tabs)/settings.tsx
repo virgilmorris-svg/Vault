@@ -217,6 +217,13 @@ export default function SettingsScreen() {
           <Text style={styles.hint}>Each person gets their own private, end-to-end encrypted vault. Accounts are fully isolated.</Text>
         </Section>
 
+        <Section title="Quick Copy">
+          <Row icon="zap" label="Open Quick Copy" onPress={() => router.push("/quick-copy")} testID="settings-quickcopy" />
+          <Text style={styles.hint}>
+            Quick Copy is a biometric-gated fast surface: unlock once, tap a login to copy its password instantly. A home-screen widget with the same UX will be available on iOS/Android after you publish and generate a native build (Expo Go doesn't support widgets).
+          </Text>
+        </Section>
+
         <Section title="Data">
           <Row
             icon="download"
