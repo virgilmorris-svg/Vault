@@ -154,7 +154,7 @@ export default function SettingsScreen() {
         </View>
 
         <Section title="Security">
-          <Row icon="lock" label="Lock now" onPress={lock} testID="settings-lock-now" />
+          <Row icon="lock" label="Lock now" onPress={() => { lock(); router.replace("/lock"); }} testID="settings-lock-now" />
           <View style={styles.bioCard} testID="settings-biometric">
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
               <View style={[styles.bioIcon, { borderColor: biometricEnabled ? theme.color.success : theme.color.border, backgroundColor: (biometricEnabled ? theme.color.success : theme.color.brand) + "22" }]}>

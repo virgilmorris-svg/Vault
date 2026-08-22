@@ -82,7 +82,7 @@ export default function GoogleSetupScreen() {
 }
 
 const styles = StyleSheet.create({
-  icon: { alignSelf: "center", width: 80, height: 80, borderRadius: 20, backgroundColor: "rgba(245,158,11,0.12)", alignItems: "center", justifyContent: "center", marginBottom: 16, borderWidth: 1, borderColor: "rgba(245,158,11,0.35)" },
+  icon: { alignSelf: "center", width: 80, height: 80, borderRadius: 20, backgroundColor: "rgba(56,189,248,0.12)", alignItems: "center", justifyContent: "center", marginBottom: 16, borderWidth: 1, borderColor: "rgba(56,189,248,0.35)" },
   title: { color: theme.color.onSurface, fontSize: 22, fontWeight: "800", textAlign: "center" },
   sub: { color: theme.color.onSurfaceTertiary, fontSize: 13, textAlign: "center", marginTop: 8, lineHeight: 19 },
   label: { color: theme.color.onSurfaceSecondary, fontSize: 12, fontWeight: "600", marginTop: 20, marginBottom: 6 },

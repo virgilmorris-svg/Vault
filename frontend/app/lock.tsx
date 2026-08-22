@@ -3,6 +3,7 @@ import {
   View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator,
   Platform, KeyboardAvoidingView,
 } from "react-native";
+import { Image } from "expo-image";
 import * as LocalAuthentication from "expo-local-authentication";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -79,8 +80,12 @@ export default function LockScreen() {
         </Pressable>
       </View>
 
-      <View style={styles.icon}>
-        <Feather name="lock" size={48} color={theme.color.brand} />
+      <View style={styles.logo}>
+        <Image
+          source={require("../assets/images/icon.png")}
+          style={{ width: 120, height: 120, borderRadius: 24 }}
+          contentFit="cover"
+        />
       </View>
       <Text style={styles.title}>Vault locked</Text>
       <Text style={styles.sub}>{user?.email}</Text>
@@ -140,9 +145,10 @@ const styles = StyleSheet.create({
   signoutText: { color: theme.color.onSurfaceTertiary, fontSize: 13 },
   icon: {
     alignSelf: "center", marginTop: 40, width: 96, height: 96, borderRadius: 24,
-    backgroundColor: "rgba(245,158,11,0.12)", alignItems: "center", justifyContent: "center",
-    borderWidth: 1, borderColor: "rgba(245,158,11,0.35)",
+    backgroundColor: "rgba(56,189,248,0.12)", alignItems: "center", justifyContent: "center",
+    borderWidth: 1, borderColor: "rgba(56,189,248,0.35)",
   },
+  logo: { alignSelf: "center", marginTop: 40 },
   title: { color: theme.color.onSurface, fontSize: 24, fontWeight: "800", textAlign: "center", marginTop: 24 },
   sub: { color: theme.color.onSurfaceTertiary, fontSize: 14, textAlign: "center", marginTop: 4 },
   formArea: { marginTop: 48 },
