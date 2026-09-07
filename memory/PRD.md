@@ -15,6 +15,8 @@ A zero-knowledge, end-to-end encrypted mobile password manager built with Expo R
 - **Security dashboard**: Aggregate 0–100 score, weak/reused/aging passwords with drill-downs.
 - **Sessions**: List active refresh sessions; revoke device.
 - **Encrypted export**: Copies ciphertext blob to clipboard (useless without master password).
+- **Home-screen Widget & Autofill**: Native Android widget + system-wide autofill service, scaffolded via Expo config plugin (requires native build).
+- **A9 Wi-Fi camera viewer (experimental)**: Native Android module that discovers and streams local A9-family cameras (CS2 "PPPP" protocol) directly over Wi-Fi, bypassing the manufacturer cloud. H.264 decoded via MediaCodec on a native SurfaceView. Requires native build; iOS pending.
 
 ## Non-Recovery
 Consistent with zero-knowledge: **no server-side master password recovery**. UI warns users.

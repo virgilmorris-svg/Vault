@@ -1,11 +1,11 @@
 // Syncs a REDACTED list of vault entries (id, title, username, url — no passwords)
 // to the shared storage read by the iOS widget/autofill (App Group UserDefaults)
-// and the Android widget/autofill (EncryptedSharedPreferences).
+// and the Android widget/autofill (SharedPreferences).
 //
 // In Expo Go / preview, native shared storage is unavailable so this is a no-op.
 // The custom native module `VauLtShared` (bundled by the config plugin at
 // prebuild time) exposes `setEntries(json)` which writes to App Group
-// UserDefaults on iOS and EncryptedSharedPreferences on Android.
+// UserDefaults on iOS and SharedPreferences on Android.
 import { NativeModules, Platform } from "react-native";
 import type { VaultEntry } from "./vault";
 

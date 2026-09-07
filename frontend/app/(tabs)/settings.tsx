@@ -224,6 +224,13 @@ export default function SettingsScreen() {
           </Text>
         </Section>
 
+        <Section title="Guides">
+          <Row icon="video" label="Secure your Wi-Fi camera" onPress={() => router.push("/camera-guide")} testID="settings-camera-guide" />
+          <Text style={styles.hint}>Step-by-step guide to block a cheap Wi-Fi camera (A9-type) from phoning home to its manufacturer's cloud, while keeping it usable locally.</Text>
+          <Row icon="wifi" label="A9 camera (local viewer)" onPress={() => router.push("/a9-camera")} testID="settings-a9-camera" />
+          <Text style={styles.hint}>Experimental: discover and view an A9 / mini Wi-Fi camera on your LAN without going through the manufacturer cloud. Requires a native Android build.</Text>
+        </Section>
+
         <Section title="Home-Screen Widget & Autofill">
           <View style={styles.extInfo} testID="extensions-info">
             <View style={styles.extRow}>

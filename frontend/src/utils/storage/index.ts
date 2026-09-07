@@ -61,7 +61,7 @@ export class Storage extends StorageBase {
     }
   }
 
-  // Sensitive values — Keychain (iOS) / EncryptedSharedPreferences (Android).
+  // Sensitive values — Keychain (iOS) / SharedPreferences (Android).
   // Use these (not getItem) for auth tokens; whatever writes with secureSet must read with secureGet under the same key.
   async secureGet<Fallback extends StorageItemValue>(
     key: string,

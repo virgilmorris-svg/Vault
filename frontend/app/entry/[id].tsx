@@ -265,7 +265,7 @@ export default function EntryScreen() {
       <GeneratorModal
         visible={genOpen}
         onClose={() => setGenOpen(false)}
-        onUse={(v) => { setPassword(v); setGenOpen(false); }}
+        onUse={(v: string) => { setPassword(v); setGenOpen(false); }}
       />
     </KeyboardAvoidingView>
   );
@@ -333,7 +333,7 @@ function PasswordField({ value, onChangeText, reveal, onToggleReveal, onGen, onC
   );
 }
 
-function GeneratorModal({ visible, onClose, onUse }: any) {
+function GeneratorModal({ visible, onClose, onUse }: { visible: boolean; onClose: () => void; onUse: (value: string) => void }) {
   const [mode, setMode] = useState<"password" | "passphrase">("password");
   const [opts, setOpts] = useState<GenOpts>({ length: 20, upper: true, lower: true, digits: true, symbols: true, avoidAmbiguous: true });
   const [words, setWords] = useState(4);
@@ -379,10 +379,10 @@ function GeneratorModal({ visible, onClose, onUse }: any) {
                   <Pressable onPress={() => setOpts({ ...opts, length: Math.min(64, opts.length + 1) })} style={styles.stepBtn}><Feather name="plus" size={14} color={theme.color.onSurface} /></Pressable>
                 </View>
               </Row>
-              <SwRow label="Uppercase" value={opts.upper} onChange={(v) => setOpts({ ...opts, upper: v })} />
-              <SwRow label="Digits" value={opts.digits} onChange={(v) => setOpts({ ...opts, digits: v })} />
-              <SwRow label="Symbols" value={opts.symbols} onChange={(v) => setOpts({ ...opts, symbols: v })} />
-              <SwRow label="Avoid ambiguous" value={opts.avoidAmbiguous} onChange={(v) => setOpts({ ...opts, avoidAmbiguous: v })} />
+              <SwRow label="Uppercase" value={opts.upper} onChange={(v: boolean) => setOpts({ ...opts, upper: v })} />
+              <SwRow label="Digits" value={opts.digits} onChange={(v: boolean) => setOpts({ ...opts, digits: v })} />
+              <SwRow label="Symbols" value={opts.symbols} onChange={(v: boolean) => setOpts({ ...opts, symbols: v })} />
+              <SwRow label="Avoid ambiguous" value={opts.avoidAmbiguous} onChange={(v: boolean) => setOpts({ ...opts, avoidAmbiguous: v })} />
             </>
           ) : (
             <Row label={`Words: ${words}`}>
@@ -415,7 +415,7 @@ function Row({ label, children }: any) {
     </View>
   );
 }
-function SwRow({ label, value, onChange }: any) {
+function SwRow({ label, value, onChange }: { label: string; value: boolean; onChange: (value: boolean) => void }) {
   return (
     <Row label={label}>
       <Switch value={value} onValueChange={onChange} trackColor={{ false: theme.color.surfaceTertiary, true: theme.color.brand }} thumbColor="#F4F4F5" />

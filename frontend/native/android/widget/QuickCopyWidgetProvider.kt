@@ -1,7 +1,9 @@
 // QuickCopyWidgetProvider — Android home-screen widget for VauLt.
-// Reads redacted login stubs from EncryptedSharedPreferences and displays
-// up to 3 rows. Tapping opens the app via `vault://quick-copy?entry_id=<id>`.
-// Zero-knowledge: this provider never holds plaintext passwords.
+// Reads redacted login stubs (id, title, username, url — NO passwords) from
+// the app's private SharedPreferences and displays up to 3 rows. Tapping a row
+// opens the app via `vault://quick-copy?entry_id=<id>` where biometric +
+// decryption happen. Zero-knowledge preserved: this provider only sees
+// non-secret metadata; the vault ciphertext stays inside the JS runtime.
 package com.emergent.securevaultsync.gbpwid
 
 import android.app.PendingIntent
@@ -11,8 +13,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.RemoteViews
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
 import org.json.JSONArray
 
 class QuickCopyWidgetProvider : AppWidgetProvider() {
@@ -48,18 +48,17 @@ class QuickCopyWidgetProvider : AppWidgetProvider() {
 
     private fun readEntries(context: Context): List<EntryStub> {
         return try {
-            val mk = MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
-            val prefs = EncryptedSharedPreferences.create(
-                context, "vault_widget_prefs", mk,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
-            )
+            val prefs = context.getSharedPreferences("vault_widget_prefs", Context.MODE_PRIVATE)
             val json = prefs.getString("entries", "[]") ?: "[]"
             val arr = JSONArray(json)
             (0 until arr.length()).map { i ->
                 val o = arr.getJSONObject(i)
-                EntryStub(o.getString("id"), o.getString("title"),
-                    o.optString("username", null), o.optString("url", null))
+                EntryStub(
+                    o.getString("id"),
+                    o.getString("title"),
+                    if (o.isNull("username")) null else o.optString("username", null),
+                    if (o.isNull("url")) null else o.optString("url", null),
+                )
             }
         } catch (e: Exception) { emptyList() }
     }

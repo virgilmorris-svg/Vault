@@ -22,7 +22,7 @@ Everything is wired through the custom Expo config plugin `plugins/withVauLtExte
 All communication goes through:
 
 - **iOS**: an App Group shared `UserDefaults` (key `com.vault.quickcopy.entries`) that stores a redacted list `{id, title, username, url}` — **never** the plaintext password. Tapping a widget/autofill row opens the app via `vault://quick-copy?entry_id=…` or `vault://autofill?domain=…`. The app decrypts locally with the master key held only in-process (or SecureStore behind biometrics).
-- **Android**: the same redacted list is stored in `EncryptedSharedPreferences` (`vault_widget_prefs`). The widget/autofill service reads titles/usernames only; requesting a password fires a `PendingIntent` that opens the app, which decrypts and returns via `IntentSender.sendIntent()`.
+- **Android**: the same redacted list is stored in standard `SharedPreferences` (`vault_widget_prefs`). The widget/autofill service reads titles/usernames only; requesting a password fires a `PendingIntent` that opens the app, which decrypts and returns via `IntentSender.sendIntent()`.
 
 This preserves zero-knowledge: the extension processes see metadata only, never plaintext passwords.
 
