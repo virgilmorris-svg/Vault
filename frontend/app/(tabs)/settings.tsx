@@ -292,8 +292,9 @@ export default function SettingsScreen() {
           {sessions.length === 0 && <Text style={styles.hint}>No other active sessions.</Text>}
         </Section>
 
-        <Section title="Account">
-          <Row icon="log-out" label="Sign out" onPress={async () => { await logout(); router.replace("/auth"); }} testID="settings-signout" danger />
+        <Section title={t("account")}>
+          <Row icon="log-out" label={t("signOut")} onPress={async () => { await logout(); router.replace("/auth"); }} testID="settings-signout" danger />
+          <Row icon="trash-2" label={t("deleteAccount")} onPress={() => router.push("/delete-account")} testID="settings-delete-account" danger />
         </Section>
 
         <Text style={styles.footer}>

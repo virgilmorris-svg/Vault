@@ -190,6 +190,11 @@ async def _close():
     client.close()
 
 
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
+
 @api.get("/")
 async def root():
     return {"service": "SentinelPass API", "status": "ok"}
@@ -314,6 +319,35 @@ async def me(user_id: str = Depends(current_user_id)):
     if not user:
         raise HTTPException(404, "User not found")
     return user
+
+
+# ---- Account deletion (App Store guideline 5.1.1(v)) ----
+class DeleteAccountBody(BaseModel):
+    confirmation: str
+    password: Optional[str] = None
+
+
+@api.delete("/account")
+async def delete_account(body: DeleteAccountBody, user_id: str = Depends(current_user_id)):
+    """Permanently delete the authenticated user's account and ALL associated data.
+    - Password accounts: must supply the correct account password.
+    - Google accounts: must type their e-mail address as confirmation.
+    """
+    user = await db.users.find_one({"user_id": user_id})
+    if not user:
+        raise HTTPException(404, "User not found")
+    if body.confirmation.lower().strip() != user["email"]:
+        raise HTTPException(400, "Confirmation does not match your e-mail address")
+    if user.get("password_hash"):
+        if not body.password or not pwd_verify(body.password, user["password_hash"]):
+            raise HTTPException(401, "Incorrect account password")
+
+    await db.sessions.delete_many({"user_id": user_id})
+    await db.vaults.delete_many({"user_id": user_id})
+    await db.files.delete_many({"user_id": user_id})
+    await db.users.delete_one({"user_id": user_id})
+    log.info(f"Account deleted: {user_id}")
+    return {"ok": True, "deleted": True}
 
 
 # ---- Vault ----

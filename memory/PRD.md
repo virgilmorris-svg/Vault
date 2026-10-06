@@ -28,3 +28,10 @@ Consistent with zero-knowledge: **no server-side master password recovery**. UI 
 
 ## Business Enhancement
 Premium tier for family sharing (shared encrypted vault group) and unlimited devices. Free tier is generous to build trust before conversion.
+
+
+## Account Deletion (App Store 5.1.1(v)) — DONE
+- Backend: `DELETE /api/account` (auth required). Body `{confirmation: email, password?}`. Password accounts must supply the correct password; Google accounts confirm by typing their e-mail. Deletes users, vaults, files, sessions.
+- Backend: `GET /health` for Kubernetes probes.
+- Frontend: Settings → Compte → "Supprimer mon compte" → `app/delete-account.tsx` (warning card, e-mail confirmation, password input, success modal → /auth). i18n fr/en/es.
+- `vault.tsx`: `deleteAccount()` calls API then clears all local secure storage.

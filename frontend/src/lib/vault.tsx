@@ -52,6 +52,7 @@ type Ctx = State & {
   signup: (email: string, password: string, master: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccount: (confirmation: string, password?: string) => Promise<void>;
   unlockWithMaster: (master: string) => Promise<void>;
   lock: () => void;
   addEntry: (e: Omit<VaultEntry, "id" | "created_at" | "updated_at">) => Promise<VaultEntry>;
@@ -256,11 +257,7 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, unlocked: true, vault, keys, version }));
   };
 
-  const logout = async () => {
-    const rt = await secure.get(K.REFRESH);
-    if (rt) {
-      try { await authApi.logout(rt); } catch {}
-    }
+  const clearLocal = async () => {
     await secure.del(K.ACCESS);
     await secure.del(K.REFRESH);
     await secure.del(K.USER);
@@ -274,6 +271,19 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
       authed: false, unlocked: false, loading: false, user: null,
       vault: null, keys: null, version: 0, autolockMinutes: 5, biometricEnabled: false,
     });
+  };
+
+  const logout = async () => {
+    const rt = await secure.get(K.REFRESH);
+    if (rt) {
+      try { await authApi.logout(rt); } catch {}
+    }
+    await clearLocal();
+  };
+
+  const deleteAccount = async (confirmation: string, password?: string) => {
+    await authApi.deleteAccount(confirmation, password);
+    await clearLocal();
   };
 
   const persistVault = useCallback(async (vault: Vault, keys: KeyMaterial, prevVersion: number) => {
@@ -364,7 +374,7 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<Ctx>(
     () => ({
       ...state,
-      signup, login, logout, unlockWithMaster, lock,
+      signup, login, logout, deleteAccount, unlockWithMaster, lock,
       addEntry, updateEntry, deleteEntry, sync,
       setAutolock, setBiometricEnabled,
       exportEncrypted, importEncrypted,

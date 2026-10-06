@@ -77,6 +77,8 @@ export const authApi = {
   logout: (refresh_token: string) =>
     api<any>(`/api/auth/logout`, { method: "POST", body: JSON.stringify({ refresh_token }) }, false),
   me: () => api<any>(`/api/me`),
+  deleteAccount: (confirmation: string, password?: string) =>
+    api<any>(`/api/account`, { method: "DELETE", body: JSON.stringify({ confirmation, password }) }),
 };
 
 export const vaultApi = {
