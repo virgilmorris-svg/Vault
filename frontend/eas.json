@@ -4,13 +4,20 @@
   },
   "build": {
     "production": {
-      "node": "18.18.0",
-      "npm": "9.6.7",
+      "node": "20.19.4",
       "autoIncrement": true,
       "distribution": "store",
       "android": {
-        "buildType": "apk",
+        "buildType": "app-bundle",
         "gradleCommand": ":app:bundleRelease"
+      }
+    },
+    "preview": {
+      "node": "20.19.4",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "gradleCommand": ":app:assembleRelease"
       }
     }
   },
@@ -20,11 +27,6 @@
         "serviceAccountKeyPath": "./google-play-api-key.json",
         "track": "production",
         "changesNotSentForReview": false
-      },
-      "ios": {
-        "appleId": "",
-        "ascAppId": "",
-        "appleTeamId": ""
       }
     }
   }

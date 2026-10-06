@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useIconFonts } from "@/src/hooks/use-icon-fonts";
 import { VaultProvider } from "@/src/lib/vault";
 import { AnimatedSplash } from "@/src/components/AnimatedSplash";
+import { LanguageProvider } from "@/src/lib/i18n";
 
 
 LogBox.ignoreAllLogs(true);
@@ -46,11 +47,13 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#09090B" }}>
-      <VaultProvider>
-        <DeepLinkBridge />
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#09090B" } }} />
-        {!splashDone && <AnimatedSplash onDone={() => setSplashDone(true)} />}
-      </VaultProvider>
+      <LanguageProvider>
+        <VaultProvider>
+          <DeepLinkBridge />
+          <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#09090B" } }} />
+          {!splashDone && <AnimatedSplash onDone={() => setSplashDone(true)} />}
+        </VaultProvider>
+      </LanguageProvider>
     </GestureHandlerRootView>
   );
 }

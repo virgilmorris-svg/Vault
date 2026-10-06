@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { useVault } from "@/src/lib/vault";
 import { theme } from "@/src/lib/theme";
 import { scorePassword } from "@/src/lib/passwords";
+import { useLanguage, type Language } from "@/src/lib/i18n";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -21,6 +22,7 @@ export default function AuthScreen() {
   const router = useRouter();
   const vault = useVault();
   const { signup, login } = vault as any;
+  const { t, language, setLanguage } = useLanguage();
   const [mode, setMode] = useState<Mode>("signin");
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
@@ -150,30 +152,38 @@ export default function AuthScreen() {
               />
             </View>
             <Text style={styles.brand}>VauLt</Text>
-            <Text style={styles.tagline}>Zero-knowledge password vault</Text>
-            <Text style={styles.credit}>Made by V.</Text>
+            <Text style={styles.tagline}>{t("zeroKnowledge")}</Text>
+            <Text style={styles.credit}>Dev: V</Text>
           </View>
         </View>
 
         <View style={styles.form}>
+          <View style={styles.languageRow}>
+            <Text style={styles.languageLabel}>{t("language")}</Text>
+            {(["fr", "en", "es"] as Language[]).map((item) => (
+              <Pressable key={item} onPress={() => setLanguage(item)} style={[styles.languageButton, language === item && styles.languageButtonActive]}>
+                <Text style={[styles.languageText, language === item && styles.languageTextActive]}>{item.toUpperCase()}</Text>
+              </Pressable>
+            ))}
+          </View>
           <View style={styles.tabs} testID="auth-mode-tabs">
             <Pressable
               testID="tab-signin"
               onPress={() => setMode("signin")}
               style={[styles.tab, mode === "signin" && styles.tabActive]}
             >
-              <Text style={[styles.tabText, mode === "signin" && styles.tabTextActive]}>Sign in</Text>
+              <Text style={[styles.tabText, mode === "signin" && styles.tabTextActive]}>{t("signIn")}</Text>
             </Pressable>
             <Pressable
               testID="tab-signup"
               onPress={() => setMode("signup")}
               style={[styles.tab, mode === "signup" && styles.tabActive]}
             >
-              <Text style={[styles.tabText, mode === "signup" && styles.tabTextActive]}>Create account</Text>
+              <Text style={[styles.tabText, mode === "signup" && styles.tabTextActive]}>{t("createAccount")}</Text>
             </Pressable>
           </View>
 
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>{t("email")}</Text>
           <TextInput
             testID="auth-email"
             style={styles.input}
@@ -186,12 +196,12 @@ export default function AuthScreen() {
             onChangeText={setEmail}
           />
 
-          <Text style={styles.label}>Account password</Text>
+          <Text style={styles.label}>{t("accountPassword")}</Text>
           <View style={styles.inputRow}>
             <TextInput
               testID="auth-account-password"
               style={[styles.input, { flex: 1 }]}
-              placeholder="At least 8 characters"
+              placeholder={t("atLeast8")}
               placeholderTextColor={theme.color.onSurfaceTertiary}
               secureTextEntry={!showPw}
               value={pw}
@@ -204,11 +214,11 @@ export default function AuthScreen() {
 
           {mode === "signup" && (
             <>
-              <Text style={styles.label}>Master password</Text>
+              <Text style={styles.label}>{t("masterPassword")}</Text>
               <TextInput
                 testID="auth-master"
                 style={styles.input}
-                placeholder="12+ characters, used to encrypt your vault"
+                placeholder={t("masterEncrypt")}
                 placeholderTextColor={theme.color.onSurfaceTertiary}
                 secureTextEntry
                 value={master}
@@ -222,18 +232,18 @@ export default function AuthScreen() {
                   <Text style={[styles.strengthLabel, { color: strength.color }]}>{strength.label}</Text>
                 </View>
               )}
-              <Text style={styles.label}>Confirm master password</Text>
+              <Text style={styles.label}>{t("confirmMaster")}</Text>
               <TextInput
                 testID="auth-master-confirm"
                 style={styles.input}
-                placeholder="Repeat master password"
+                placeholder={t("repeatMaster")}
                 placeholderTextColor={theme.color.onSurfaceTertiary}
                 secureTextEntry
                 value={confirmMaster}
                 onChangeText={setConfirmMaster}
               />
               <Text style={styles.notice}>
-                Your master password never leaves this device. It cannot be recovered if lost.
+                {t("masterLocal")}
               </Text>
             </>
           )}
@@ -255,7 +265,7 @@ export default function AuthScreen() {
               <ActivityIndicator color={theme.color.onBrand} />
             ) : (
               <Text style={styles.ctaText}>
-                {mode === "signup" ? "Create secure vault" : "Sign in"}
+                {mode === "signup" ? t("createVault") : t("signIn")}
               </Text>
             )}
           </Pressable>
@@ -272,7 +282,7 @@ export default function AuthScreen() {
             style={({ pressed }) => [styles.googleBtn, pressed && { opacity: 0.7 }]}
           >
             <Feather name="chrome" size={18} color={theme.color.onSurface} />
-            <Text style={styles.googleText}>Continue with Google</Text>
+            <Text style={styles.googleText}>{t("signInWithGoogle")}</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -290,8 +300,14 @@ const styles = StyleSheet.create({
   },
   brand: { color: theme.color.onSurface, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
   tagline: { color: theme.color.onSurfaceSecondary, fontSize: 14, marginTop: 4 },
-  credit: { color: theme.color.brand, fontSize: 12, fontWeight: "700", marginTop: 8, letterSpacing: 1 },
+  credit: { color: theme.color.brand, fontSize: 14, fontStyle: "italic", fontWeight: "700", marginTop: 8, letterSpacing: 0.5 },
   form: { padding: 24, paddingBottom: 48 },
+  languageRow: { flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: 6, marginBottom: 16 },
+  languageLabel: { color: theme.color.onSurfaceTertiary, fontSize: 12, marginRight: 4 },
+  languageButton: { borderWidth: 1, borderColor: theme.color.border, borderRadius: 8, paddingHorizontal: 9, paddingVertical: 6 },
+  languageButtonActive: { backgroundColor: theme.color.brand, borderColor: theme.color.brand },
+  languageText: { color: theme.color.onSurfaceTertiary, fontSize: 11, fontWeight: "700" },
+  languageTextActive: { color: theme.color.onBrand },
   tabs: {
     flexDirection: "row",
     backgroundColor: theme.color.surfaceSecondary,

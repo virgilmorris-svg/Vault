@@ -9,6 +9,7 @@ import { useVault } from "@/src/lib/vault";
 import { theme } from "@/src/lib/theme";
 import { sessionsApi } from "@/src/lib/api";
 import { InfoModal } from "@/src/components/InfoModal";
+import { useLanguage, type Language } from "@/src/lib/i18n";
 
 const AUTOLOCK_OPTIONS = [
   { label: "Immediately", value: 0 },
@@ -22,6 +23,7 @@ export default function SettingsScreen() {
   const router = useRouter();
   const vault = useVault();
   const { user, autolockMinutes, setAutolock, biometricEnabled, setBiometricEnabled, lock, logout, exportEncrypted, keys } = vault as any;
+  const { t, language, setLanguage } = useLanguage();
   const [hasBio, setHasBio] = useState(false);
   const [bioTypes, setBioTypes] = useState<string>("");
   const [sessions, setSessions] = useState<any[]>([]);
@@ -149,19 +151,29 @@ export default function SettingsScreen() {
     <SafeAreaView style={styles.c} edges={["top"]}>
       <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
         <View style={styles.header}>
-          <Text style={styles.title}>Settings</Text>
+          <Text style={styles.title}>{t("settings")}</Text>
           <Text style={styles.sub}>{user?.email}</Text>
         </View>
 
-        <Section title="Security">
-          <Row icon="lock" label="Lock now" onPress={() => { lock(); router.replace("/lock"); }} testID="settings-lock-now" />
+        <Section title={t("language")}>
+          <View style={styles.languageRow}>
+            {(["fr", "en", "es"] as Language[]).map((item) => (
+              <Pressable key={item} onPress={() => setLanguage(item)} style={[styles.languageButton, language === item && styles.languageButtonActive]}>
+                <Text style={[styles.languageText, language === item && styles.languageTextActive]}>{item === "fr" ? t("french") : item === "en" ? t("english") : t("spanish")}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </Section>
+
+        <Section title={t("security")}>
+          <Row icon="lock" label={t("lockNow")} onPress={() => { lock(); router.replace("/lock"); }} testID="settings-lock-now" />
           <View style={styles.bioCard} testID="settings-biometric">
             <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
               <View style={[styles.bioIcon, { borderColor: biometricEnabled ? theme.color.success : theme.color.border, backgroundColor: (biometricEnabled ? theme.color.success : theme.color.brand) + "22" }]}>
                 <Feather name={biometricEnabled ? "check" : "unlock"} size={18} color={biometricEnabled ? theme.color.success : theme.color.brand} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.bioLabel}>Biometric unlock</Text>
+                <Text style={styles.bioLabel}>{t("biometric")}</Text>
                 <Text style={styles.bioStatus}>
                   {Platform.OS === "web"
                     ? "Not available in browser preview"
@@ -184,13 +196,13 @@ export default function SettingsScreen() {
               ]}
             >
               <Text style={[styles.bioBtnText, { color: biometricEnabled ? theme.color.error : theme.color.onBrand }]}>
-                {bioBusy ? "…" : biometricEnabled ? "Disable" : "Enable biometric unlock"}
+                {bioBusy ? "…" : biometricEnabled ? t("disable") : t("enable")}
               </Text>
             </Pressable>
           </View>
           <Row
             icon="clock"
-            label="Auto-lock"
+            label={t("autoLock")}
             valueText={AUTOLOCK_OPTIONS.find((o) => o.value === autolockMinutes)?.label || `${autolockMinutes}m`}
             onPress={() => setShowAutolock((s) => !s)}
             testID="settings-autolock"
@@ -337,6 +349,11 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: 20, paddingTop: 12 },
   title: { color: theme.color.onSurface, fontSize: 28, fontWeight: "800", letterSpacing: -0.5 },
   sub: { color: theme.color.onSurfaceTertiary, fontSize: 13, marginTop: 4 },
+  languageRow: { flexDirection: "row", gap: 8, padding: 14 },
+  languageButton: { flex: 1, alignItems: "center", borderWidth: 1, borderColor: theme.color.border, borderRadius: 8, paddingVertical: 10 },
+  languageButtonActive: { backgroundColor: theme.color.brand, borderColor: theme.color.brand },
+  languageText: { color: theme.color.onSurfaceSecondary, fontSize: 12, fontWeight: "600" },
+  languageTextActive: { color: theme.color.onBrand },
   section: { marginTop: 24 },
   sectionTitle: {
     color: theme.color.onSurfaceTertiary, fontSize: 11, fontWeight: "700",

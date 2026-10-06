@@ -10,11 +10,13 @@ import { useRouter } from "expo-router";
 import { useVault } from "@/src/lib/vault";
 import { secure, K } from "@/src/lib/storage";
 import { theme } from "@/src/lib/theme";
+import { useLanguage } from "@/src/lib/i18n";
 
 export default function LockScreen() {
   const router = useRouter();
   const vault = useVault();
   const { unlockWithMaster, biometricEnabled, logout, user } = vault as any;
+  const { t } = useLanguage();
   const [master, setMaster] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export default function LockScreen() {
       await unlockWithMaster(master);
       router.replace("/(tabs)/vault");
     } catch (e: any) {
-      setErr(e.message || "Wrong master password");
+      setErr(e.message || t("wrongMaster"));
     } finally {
       setLoading(false);
     }
@@ -51,12 +53,12 @@ export default function LockScreen() {
     try {
       const keysStr = await secure.get(K.BIOMETRIC_KEY);
       if (!keysStr) {
-        setErr("Enable biometric unlock in Settings first");
+        setErr(`${t("enable")} ${t("biometric")} ${t("settings")}`);
         return;
       }
       const r = await LocalAuthentication.authenticateAsync({
-        promptMessage: "Unlock SentinelPass",
-        fallbackLabel: "Use master password",
+        promptMessage: t("unlockBiometric"),
+        fallbackLabel: t("masterPassword"),
       });
       if (!r.success) return;
       const keys = JSON.parse(keysStr);
@@ -64,7 +66,7 @@ export default function LockScreen() {
       await vault.unlockWithBiometricKeys(keys);
       router.replace("/(tabs)/vault");
     } catch (e: any) {
-      setErr(e.message || "Biometric unlock failed");
+      setErr(e.message || t("wrongMaster"));
     }
   };
 
@@ -76,7 +78,7 @@ export default function LockScreen() {
       <View style={styles.header}>
         <Pressable onPress={async () => { await logout(); router.replace("/auth"); }} style={styles.signout} testID="lock-signout">
           <Feather name="log-out" size={16} color={theme.color.onSurfaceTertiary} />
-          <Text style={styles.signoutText}>Sign out</Text>
+          <Text style={styles.signoutText}>{t("signOut")}</Text>
         </Pressable>
       </View>
 
@@ -87,14 +89,14 @@ export default function LockScreen() {
           contentFit="cover"
         />
       </View>
-      <Text style={styles.title}>Vault locked</Text>
+      <Text style={styles.title}>{t("vaultLocked")}</Text>
       <Text style={styles.sub}>{user?.email}</Text>
 
       <View style={styles.formArea}>
         <TextInput
           testID="lock-master"
           style={styles.input}
-          placeholder="Master password"
+          placeholder={t("masterPassword")}
           placeholderTextColor={theme.color.onSurfaceTertiary}
           secureTextEntry
           value={master}
@@ -110,7 +112,7 @@ export default function LockScreen() {
           style={({ pressed }) => [styles.cta, (pressed || loading) && { opacity: 0.85 }]}
         >
           {loading ? <ActivityIndicator color={theme.color.onBrand} /> : (
-            <Text style={styles.ctaText}>Unlock</Text>
+            <Text style={styles.ctaText}>{t("unlock")}</Text>
           )}
         </Pressable>
 
@@ -121,7 +123,7 @@ export default function LockScreen() {
             style={({ pressed }) => [styles.bio, pressed && { opacity: 0.7 }]}
           >
             <Feather name="unlock" size={20} color={theme.color.brand} />
-            <Text style={styles.bioText}>Unlock with biometrics</Text>
+            <Text style={styles.bioText}>{t("unlockBiometric")}</Text>
           </Pressable>
         )}
 
@@ -131,7 +133,7 @@ export default function LockScreen() {
           style={({ pressed }) => [styles.switchAccount, pressed && { opacity: 0.6 }]}
         >
           <Feather name="user-plus" size={16} color={theme.color.onSurfaceTertiary} />
-          <Text style={styles.switchText}>Use a different account or create a new one</Text>
+          <Text style={styles.switchText}>{t("differentAccount")}</Text>
         </Pressable>
       </View>
     </KeyboardAvoidingView>

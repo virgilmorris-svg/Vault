@@ -1,8 +1,10 @@
 import { Tabs } from "expo-router";
 import { Feather } from "@expo/vector-icons";
 import { theme } from "@/src/lib/theme";
+import { useLanguage } from "@/src/lib/i18n";
 
 export default function TabsLayout() {
+  const { t } = useLanguage();
   return (
     <Tabs
       screenOptions={{
@@ -23,7 +25,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="vault"
         options={{
-          title: "Vault",
+          title: t("vault"),
           tabBarIcon: ({ color }) => <Feather name="shield" size={22} color={color} />,
           tabBarButtonTestID: "tab-vault",
         }}
@@ -31,7 +33,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="generator"
         options={{
-          title: "Generator",
+          title: t("generator"),
           tabBarIcon: ({ color }) => <Feather name="hash" size={22} color={color} />,
           tabBarButtonTestID: "tab-generator",
         }}
@@ -39,7 +41,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="security"
         options={{
-          title: "Security",
+          title: t("securityTab"),
           tabBarIcon: ({ color }) => <Feather name="activity" size={22} color={color} />,
           tabBarButtonTestID: "tab-security",
         }}
@@ -47,7 +49,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: "Settings",
+          title: t("settings"),
           tabBarIcon: ({ color }) => <Feather name="settings" size={22} color={color} />,
           tabBarButtonTestID: "tab-settings",
         }}

@@ -2,6 +2,7 @@
 import { secure, K } from "./storage";
 
 const BASE = process.env.EXPO_PUBLIC_BACKEND_URL || "";
+const REQUEST_TIMEOUT_MS = 15000;
 
 async function refreshTokens(): Promise<boolean> {
   const rt = await secure.get(K.REFRESH);
@@ -37,7 +38,19 @@ export async function api<T = any>(
     if (tok) headers["Authorization"] = `Bearer ${tok}`;
   }
   const url = `${BASE}${path}`;
-  const res = await fetch(url, { ...init, headers });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let res: Response;
+  try {
+    res = await fetch(url, { ...init, headers, signal: controller.signal });
+  } catch (error: any) {
+    if (error?.name === "AbortError") {
+      throw new Error("The server took too long to respond. Check your connection and try again.");
+    }
+    throw new Error("Unable to reach the server. Check your connection and try again.");
+  } finally {
+    clearTimeout(timeout);
+  }
   if (res.status === 401 && auth && !retried) {
     const ok = await refreshTokens();
     if (ok) return api<T>(path, init, auth, true);
