@@ -4,6 +4,7 @@ import {
   KeyboardAvoidingView, Platform, ActivityIndicator,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import * as Clipboard from "expo-clipboard";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useVault } from "@/src/lib/vault";
@@ -13,7 +14,7 @@ import { InfoModal } from "@/src/components/InfoModal";
 
 export default function DeleteAccountScreen() {
   const router = useRouter();
-  const { user, deleteAccount } = useVault();
+  const { user, keys, deleteAccount, exportEncrypted } = useVault();
   const { t } = useLanguage();
   const [confirmation, setConfirmation] = useState("");
   const [password, setPassword] = useState("");
@@ -21,6 +22,25 @@ export default function DeleteAccountScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [exported, setExported] = useState(false);
+  const [info, setInfo] = useState<{ title: string; message: string; kind: "success" | "error" } | null>(null);
+
+  const doExport = async () => {
+    if (!keys) {
+      setInfo({ title: t("exportVault"), message: t("exportNeedsUnlock"), kind: "error" });
+      return;
+    }
+    try {
+      const blob = await exportEncrypted();
+      if (blob) {
+        await Clipboard.setStringAsync(blob);
+        setExported(true);
+        setInfo({ title: t("exportCopied"), message: t("exportCopiedMsg"), kind: "success" });
+      }
+    } catch (e: any) {
+      setInfo({ title: t("exportVault"), message: e?.message || "Export failed", kind: "error" });
+    }
+  };
 
   const needsPassword = user?.provider !== "google";
   const email: string = (user?.email || "").toLowerCase();
@@ -68,6 +88,18 @@ export default function DeleteAccountScreen() {
             ))}
             <Text style={styles.noRecovery}>{t("deleteAccountNoRecovery")}</Text>
           </View>
+
+          <Pressable
+            testID="delete-account-export"
+            onPress={doExport}
+            style={({ pressed }) => [styles.exportBtn, exported && styles.exportBtnDone, pressed && { opacity: 0.8 }]}
+          >
+            <Feather name={exported ? "check-circle" : "download"} size={18} color={exported ? theme.color.success : theme.color.brand} />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.exportTitle, exported && { color: theme.color.success }]}>{exported ? t("exportCopied") : t("exportVault")}</Text>
+              <Text style={styles.exportHint}>{t("exportVaultHint")}</Text>
+            </View>
+          </Pressable>
 
           <Text style={styles.label}>{t("typeEmailToConfirm")}</Text>
           <TextInput
@@ -135,6 +167,14 @@ export default function DeleteAccountScreen() {
       </KeyboardAvoidingView>
 
       <InfoModal
+        visible={!!info}
+        title={info?.title || ""}
+        message={info?.message || ""}
+        kind={info?.kind || "info"}
+        onClose={() => setInfo(null)}
+      />
+
+      <InfoModal
         visible={done}
         title={t("accountDeleted")}
         message={t("accountDeletedMsg")}
@@ -164,6 +204,14 @@ const styles = StyleSheet.create({
   itemRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 4 },
   itemText: { color: theme.color.onSurface, fontSize: 14, flex: 1 },
   noRecovery: { color: theme.color.onSurfaceTertiary, fontSize: 12, marginTop: 12, lineHeight: 17 },
+  exportBtn: {
+    flexDirection: "row", alignItems: "center", gap: 12, marginTop: 16,
+    backgroundColor: theme.color.surfaceSecondary, borderWidth: 1, borderColor: theme.color.brand + "66",
+    borderRadius: 14, padding: 14, minHeight: 56,
+  },
+  exportBtnDone: { borderColor: theme.color.success + "66" },
+  exportTitle: { color: theme.color.brand, fontSize: 15, fontWeight: "700" },
+  exportHint: { color: theme.color.onSurfaceTertiary, fontSize: 12, marginTop: 2, lineHeight: 16 },
   label: { color: theme.color.onSurfaceSecondary, fontSize: 12, fontWeight: "600", marginTop: 20, marginBottom: 6 },
   input: {
     backgroundColor: theme.color.surfaceSecondary,

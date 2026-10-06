@@ -35,3 +35,8 @@ Premium tier for family sharing (shared encrypted vault group) and unlimited dev
 - Backend: `GET /health` for Kubernetes probes.
 - Frontend: Settings → Compte → "Supprimer mon compte" → `app/delete-account.tsx` (warning card, e-mail confirmation, password input, success modal → /auth). i18n fr/en/es.
 - `vault.tsx`: `deleteAccount()` calls API then clears all local secure storage.
+
+- Delete screen now has an "Exporter mon coffre" button (copies encrypted blob to clipboard; requires unlocked vault).
+
+## A9 Camera integration — REMOVED (user request)
+- Deleted `native/android/camera/*`, `src/lib/a9camera.ts`, `app/a9-camera.tsx`; removed A9 copy/register/coroutines steps from `plugins/withVauLtExtensions.js`; removed settings row. Photo/video attachments (expo-image-picker + encrypted upload via `media.ts`) are unchanged. The Wi-Fi camera hardening guide (`camera-guide.tsx`) is kept.

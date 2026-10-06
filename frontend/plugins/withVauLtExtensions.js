@@ -17,8 +17,6 @@ const {
   withInfoPlist,
   withAndroidManifest,
   withDangerousMod,
-  withMainApplication,
-  withAppBuildGradle,
 } = require("@expo/config-plugins");
 
 const APP_GROUP = "group.com.emergent.vault";
@@ -120,11 +118,10 @@ function withAndroidCopyExtensions(config) {
       const proj = cfg.modRequest.platformProjectRoot;
       const pkgPath = PKG.replace(/\./g, "/");
       const javaDst = path.join(proj, "app", "src", "main", "java", pkgPath);
-      const a9Dst = path.join(javaDst, "a9");
       const layoutDst = path.join(proj, "app", "src", "main", "res", "layout");
       const xmlDst = path.join(proj, "app", "src", "main", "res", "xml");
       try {
-        for (const p of [javaDst, a9Dst, layoutDst, xmlDst]) fs.mkdirSync(p, { recursive: true });
+        for (const p of [javaDst, layoutDst, xmlDst]) fs.mkdirSync(p, { recursive: true });
         // Widget
         fs.copyFileSync(path.join(src, "widget", "QuickCopyWidgetProvider.kt"),
                         path.join(javaDst, "QuickCopyWidgetProvider.kt"));
@@ -137,17 +134,6 @@ function withAndroidCopyExtensions(config) {
                         path.join(javaDst, "VauLtAutofillService.kt"));
         fs.copyFileSync(path.join(src, "autofill", "vault_autofill_service.xml"),
                         path.join(xmlDst, "vault_autofill_service.xml"));
-        // A9 camera native module (sub-package `.a9`)
-        for (const f of [
-          "PPPPProtocol.kt",
-          "A9CameraModule.kt",
-          "A9VideoView.kt",
-          "A9VideoViewManager.kt",
-          "A9CameraPackage.kt",
-        ]) {
-          const s = path.join(src, "camera", f);
-          if (fs.existsSync(s)) fs.copyFileSync(s, path.join(a9Dst, f));
-        }
         // Simple autofill row layout (referenced by service)
         const autofillRow = `<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -165,57 +151,11 @@ function withAndroidCopyExtensions(config) {
   ]);
 }
 
-// Register the A9CameraPackage inside MainApplication.kt so React Native can
-// discover the module. We insert the import and a `packages.add(...)` line
-// idempotently — safe to run on every prebuild.
-function withA9RegisterPackage(config) {
-  return withMainApplication(config, (cfg) => {
-    let src = cfg.modResults.contents;
-    const importLine = `import ${PKG}.a9.A9CameraPackage`;
-    if (!src.includes(importLine)) {
-      src = src.replace(/(package [^\n]+\n)/, `$1\n${importLine}\n`);
-    }
-    // Insert `packages.add(A9CameraPackage())` right after `PackageList(this).packages`.
-    if (!src.includes("A9CameraPackage()")) {
-      src = src.replace(
-        /(val packages\s*=\s*PackageList\(this\)\.packages[^\n]*\n)/,
-        `$1              packages.add(A9CameraPackage())\n`,
-      );
-      // Fallback: Kotlin RN template sometimes uses `packages.apply`.
-      if (!src.includes("A9CameraPackage()")) {
-        src = src.replace(
-          /(override fun getPackages\(\)[^{]*\{[^}]*)(return packages)/s,
-          `$1packages.add(A9CameraPackage())\n              $2`,
-        );
-      }
-    }
-    cfg.modResults.contents = src;
-    return cfg;
-  });
-}
-
-// Ensure kotlinx-coroutines is on the classpath for the A9 module. React
-// Native ships it transitively on recent SDKs, but adding it explicitly is a
-// cheap safety net that prevents "Unresolved reference: kotlinx" errors.
-function withA9Coroutines(config) {
-  return withAppBuildGradle(config, (cfg) => {
-    let src = cfg.modResults.contents;
-    const dep = `implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"`;
-    if (!src.includes("kotlinx-coroutines-android")) {
-      src = src.replace(/dependencies\s*\{/, (m) => `${m}\n    ${dep}`);
-    }
-    cfg.modResults.contents = src;
-    return cfg;
-  });
-}
-
 module.exports = function withVauLtExtensions(config) {
   config = withIosBackgroundURLScheme(config);
   config = withIosAppGroup(config);
   config = withIosCopyExtensions(config);
   config = withAndroidManifestExtensions(config);
   config = withAndroidCopyExtensions(config);
-  config = withA9RegisterPackage(config);
-  config = withA9Coroutines(config);
   return config;
 };

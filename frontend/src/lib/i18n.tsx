@@ -30,6 +30,9 @@ const translations = {
     deletePermanently: "Supprimer définitivement", deleting: "Suppression…", cancel: "Annuler",
     emailMismatch: "L’adresse e-mail ne correspond pas", accountDeleted: "Compte supprimé",
     accountDeletedMsg: "Votre compte et toutes vos données ont été supprimés.",
+    exportVault: "Exporter mon coffre", exportVaultHint: "Copie votre coffre chiffré dans le presse-papiers. Collez-le dans un endroit sûr : il restera illisible sans votre mot de passe maître.",
+    exportCopied: "Coffre chiffré copié", exportCopiedMsg: "Votre coffre chiffré est dans le presse-papiers. Collez-le dans un fichier ou une note sécurisée avant de continuer.",
+    exportNeedsUnlock: "Déverrouillez d’abord votre coffre pour pouvoir l’exporter.",
   },
   en: {
     signIn: "Sign in", createAccount: "Create account", email: "Email", accountPassword: "Account password",
@@ -54,6 +57,9 @@ const translations = {
     deletePermanently: "Delete permanently", deleting: "Deleting…", cancel: "Cancel",
     emailMismatch: "E-mail address does not match", accountDeleted: "Account deleted",
     accountDeletedMsg: "Your account and all your data have been deleted.",
+    exportVault: "Export my vault", exportVaultHint: "Copies your encrypted vault to the clipboard. Paste it somewhere safe: it stays unreadable without your master password.",
+    exportCopied: "Encrypted vault copied", exportCopiedMsg: "Your encrypted vault is in the clipboard. Paste it into a file or secure note before continuing.",
+    exportNeedsUnlock: "Unlock your vault first to export it.",
   },
   es: {
     signIn: "Iniciar sesión", createAccount: "Crear cuenta", email: "Correo electrónico", accountPassword: "Contraseña de la cuenta",
@@ -78,6 +84,9 @@ const translations = {
     deletePermanently: "Eliminar definitivamente", deleting: "Eliminando…", cancel: "Cancelar",
     emailMismatch: "El correo electrónico no coincide", accountDeleted: "Cuenta eliminada",
     accountDeletedMsg: "Tu cuenta y todos tus datos han sido eliminados.",
+    exportVault: "Exportar mi bóveda", exportVaultHint: "Copia tu bóveda cifrada al portapapeles. Pégala en un lugar seguro: seguirá siendo ilegible sin tu contraseña maestra.",
+    exportCopied: "Bóveda cifrada copiada", exportCopiedMsg: "Tu bóveda cifrada está en el portapapeles. Pégala en un archivo o nota segura antes de continuar.",
+    exportNeedsUnlock: "Desbloquea primero tu bóveda para exportarla.",
   },
 } as const;
 
