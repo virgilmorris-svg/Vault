@@ -32,7 +32,7 @@ const translations = {
     accountDeletedMsg: "Votre compte et toutes vos données ont été supprimés.",
     exportVault: "Exporter mon coffre", exportVaultHint: "Copie votre coffre chiffré dans le presse-papiers. Collez-le dans un endroit sûr : il restera illisible sans votre mot de passe maître.",
     exportCopied: "Coffre chiffré copié", exportCopiedMsg: "Votre coffre chiffré est dans le presse-papiers. Collez-le dans un fichier ou une note sécurisée avant de continuer.",
-    exportNeedsUnlock: "Déverrouillez d’abord votre coffre pour pouvoir l’exporter.",
+    exportNeedsUnlock: "Déverrouillez d’abord votre coffre pour pouvoir l’exporter.", decrypting: "Déchiffrement du coffre…",
   },
   en: {
     signIn: "Sign in", createAccount: "Create account", email: "Email", accountPassword: "Account password",
@@ -59,7 +59,7 @@ const translations = {
     accountDeletedMsg: "Your account and all your data have been deleted.",
     exportVault: "Export my vault", exportVaultHint: "Copies your encrypted vault to the clipboard. Paste it somewhere safe: it stays unreadable without your master password.",
     exportCopied: "Encrypted vault copied", exportCopiedMsg: "Your encrypted vault is in the clipboard. Paste it into a file or secure note before continuing.",
-    exportNeedsUnlock: "Unlock your vault first to export it.",
+    exportNeedsUnlock: "Unlock your vault first to export it.", decrypting: "Decrypting vault…",
   },
   es: {
     signIn: "Iniciar sesión", createAccount: "Crear cuenta", email: "Correo electrónico", accountPassword: "Contraseña de la cuenta",
@@ -86,7 +86,7 @@ const translations = {
     accountDeletedMsg: "Tu cuenta y todos tus datos han sido eliminados.",
     exportVault: "Exportar mi bóveda", exportVaultHint: "Copia tu bóveda cifrada al portapapeles. Pégala en un lugar seguro: seguirá siendo ilegible sin tu contraseña maestra.",
     exportCopied: "Bóveda cifrada copiada", exportCopiedMsg: "Tu bóveda cifrada está en el portapapeles. Pégala en un archivo o nota segura antes de continuar.",
-    exportNeedsUnlock: "Desbloquea primero tu bóveda para exportarla.",
+    exportNeedsUnlock: "Desbloquea primero tu bóveda para exportarla.", decrypting: "Descifrando la bóveda…",
   },
 } as const;
 

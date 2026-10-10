@@ -1,10 +1,16 @@
 // Client-side cryptography for zero-knowledge vault.
 // Uses PBKDF2-SHA256 (200k iters) + AES-256-CBC + HMAC-SHA256 (encrypt-then-mac).
-// crypto-js is a pure JS lib, works in Expo Go on iOS, Android and Web.
+// PBKDF2 runs through @noble/hashes (pure JS, typed-array based, ~7x faster than
+// crypto-js on Hermes) and yields to the event loop so the UI stays responsive
+// on low-end Android devices. Output is byte-identical to the previous crypto-js
+// implementation, so existing vaults keep decrypting.
 import CryptoJS from "crypto-js";
+import { pbkdf2Async } from "@noble/hashes/pbkdf2.js";
+import { sha256 } from "@noble/hashes/sha2.js";
+import { bytesToHex } from "@noble/hashes/utils.js";
 
 const KDF_ITERATIONS = 200000;
-const KEY_SIZE_BITS = 512; // 32 bytes AES key + 32 bytes HMAC key
+const KEY_SIZE_BYTES = 64; // 32 bytes AES key + 32 bytes HMAC key
 
 export type KeyMaterial = {
   aesKeyHex: string;
@@ -20,17 +26,26 @@ export function randomSaltB64(): string {
   return randomBytesB64(16);
 }
 
+function b64ToBytes(b64: string): Uint8Array {
+  const wa = CryptoJS.enc.Base64.parse(b64);
+  const out = new Uint8Array(wa.sigBytes);
+  for (let i = 0; i < wa.sigBytes; i++) {
+    out[i] = (wa.words[i >>> 2] >>> (24 - (i % 4) * 8)) & 0xff;
+  }
+  return out;
+}
+
 /**
  * Derive AES + HMAC keys from master password using PBKDF2-SHA256.
+ * Async: yields every few hundred iterations so spinners keep animating.
  */
-export function deriveKeys(masterPassword: string, saltB64: string): KeyMaterial {
-  const salt = CryptoJS.enc.Base64.parse(saltB64);
-  const derived = CryptoJS.PBKDF2(masterPassword, salt, {
-    keySize: KEY_SIZE_BITS / 32, // in 32-bit words: 16 => 64 bytes total
-    iterations: KDF_ITERATIONS,
-    hasher: CryptoJS.algo.SHA256,
+export async function deriveKeys(masterPassword: string, saltB64: string): Promise<KeyMaterial> {
+  const derived = await pbkdf2Async(sha256, masterPassword, b64ToBytes(saltB64), {
+    c: KDF_ITERATIONS,
+    dkLen: KEY_SIZE_BYTES,
+    asyncTick: 15,
   });
-  const hex = derived.toString(CryptoJS.enc.Hex);
+  const hex = bytesToHex(derived);
   return {
     aesKeyHex: hex.slice(0, 64), // 32 bytes AES-256 key
     hmacKeyHex: hex.slice(64, 128), // 32 bytes HMAC key

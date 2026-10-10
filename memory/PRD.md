@@ -40,3 +40,9 @@ Premium tier for family sharing (shared encrypted vault group) and unlimited dev
 
 ## A9 Camera integration — REMOVED (user request)
 - Deleted `native/android/camera/*`, `src/lib/a9camera.ts`, `app/a9-camera.tsx`; removed A9 copy/register/coroutines steps from `plugins/withVauLtExtensions.js`; removed settings row. Photo/video attachments (expo-image-picker + encrypted upload via `media.ts`) are unchanged. The Wi-Fi camera hardening guide (`camera-guide.tsx`) is kept.
+
+## Startup / unlock performance for low-end Android — DONE
+- KDF (PBKDF2-SHA256, 200k iters) moved from crypto-js to `@noble/hashes` (`pbkdf2Async`, yields every 15ms). ~7x faster, byte-identical output (verified against a legacy crypto-js vault), UI no longer freezes during unlock. `deriveKeys` is now async.
+- `unlockWithMaster` fetches the remote vault in parallel with the KDF instead of after it.
+- Startup SecureStore reads parallelized; animated splash shortened from ~2.1s to ~1.1s.
+- Lock screen shows "Déchiffrement du coffre…" while deriving keys.

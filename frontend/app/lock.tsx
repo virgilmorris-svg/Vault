@@ -115,6 +115,7 @@ export default function LockScreen() {
             <Text style={styles.ctaText}>{t("unlock")}</Text>
           )}
         </Pressable>
+        {loading && <Text style={styles.decrypting} testID="lock-decrypting">{t("decrypting")}</Text>}
 
         {biometricEnabled && hasBiometrics && (
           <Pressable
@@ -141,6 +142,7 @@ export default function LockScreen() {
 }
 
 const styles = StyleSheet.create({
+  decrypting: { color: theme.color.onSurfaceTertiary, fontSize: 12, textAlign: "center", marginTop: 10 },
   c: { flex: 1, backgroundColor: theme.color.surface, padding: 24, paddingTop: 60 },
   header: { flexDirection: "row", justifyContent: "flex-end" },
   signout: { flexDirection: "row", alignItems: "center", gap: 6, padding: 8 },

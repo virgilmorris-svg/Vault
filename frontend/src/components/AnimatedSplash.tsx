@@ -23,14 +23,14 @@ export function AnimatedSplash({ onDone }: { onDone: () => void }) {
   const opacity = useSharedValue(1);
 
   useEffect(() => {
-    scale.value = withTiming(1, { duration: 700, easing: Easing.out(Easing.exp) });
+    scale.value = withTiming(1, { duration: 450, easing: Easing.out(Easing.exp) });
     rot.value = withSequence(
-      withTiming(6, { duration: 350, easing: Easing.out(Easing.quad) }),
-      withTiming(-3, { duration: 220, easing: Easing.inOut(Easing.quad) }),
-      withTiming(0, { duration: 200, easing: Easing.inOut(Easing.quad) }),
+      withTiming(6, { duration: 220, easing: Easing.out(Easing.quad) }),
+      withTiming(-3, { duration: 150, easing: Easing.inOut(Easing.quad) }),
+      withTiming(0, { duration: 130, easing: Easing.inOut(Easing.quad) }),
     );
-    halo.value = withDelay(200, withTiming(1, { duration: 900, easing: Easing.out(Easing.quad) }));
-    opacity.value = withDelay(1600, withTiming(0, { duration: 500, easing: Easing.inOut(Easing.quad) }, (finished) => {
+    halo.value = withDelay(100, withTiming(1, { duration: 600, easing: Easing.out(Easing.quad) }));
+    opacity.value = withDelay(750, withTiming(0, { duration: 350, easing: Easing.inOut(Easing.quad) }, (finished) => {
       if (finished) runOnJS(onDone)();
     }));
   }, []);

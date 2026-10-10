@@ -90,10 +90,10 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
   const persistState = state;
 
   const load = useCallback(async () => {
-    const access = await secure.get(K.ACCESS);
-    const userStr = await secure.get(K.USER);
-    const autolockStr = await secure.get(K.AUTOLOCK_MINUTES);
-    const bio = (await secure.get(K.BIOMETRIC_ENABLED)) === "1";
+    const [access, userStr, autolockStr, bioStr] = await Promise.all([
+      secure.get(K.ACCESS), secure.get(K.USER), secure.get(K.AUTOLOCK_MINUTES), secure.get(K.BIOMETRIC_ENABLED),
+    ]);
+    const bio = bioStr === "1";
     setState((s) => ({
       ...s,
       authed: !!access && !!userStr,
@@ -134,7 +134,7 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
 
   const signup = async (email: string, password: string, master: string) => {
     const salt = randomSaltB64();
-    const keys = deriveKeys(master, salt);
+    const keys = await deriveKeys(master, salt);
     const tokens = await authApi.register(email, password, salt);
     await secure.set(K.ACCESS, tokens.access_token);
     await secure.set(K.REFRESH, tokens.refresh_token);
@@ -187,7 +187,7 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
 
   const setupMasterForGoogleUser = async (master: string) => {
     const salt = randomSaltB64();
-    const keys = deriveKeys(master, salt);
+    const keys = await deriveKeys(master, salt);
     await api<any>("/api/user/kdf-salt", { method: "PUT", body: JSON.stringify({ kdf_salt: salt }) });
     await secure.set(K.KDF_SALT, salt);
     const verifier = verifierHash(keys);
@@ -202,12 +202,14 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
   const unlockWithMaster = async (master: string) => {
     const salt = await secure.get(K.KDF_SALT);
     if (!salt) throw new Error("Missing salt — please sign in again");
-    const keys = deriveKeys(master, salt);
-    // Try fetch remote vault first
+    // Kick off the network fetch while the (slow) KDF runs, instead of serially.
+    const remotePromise = vaultApi.get().catch(() => null);
+    const keys = await deriveKeys(master, salt);
     let blob: string | null = null;
     let version = 0;
     try {
-      const remote = await vaultApi.get();
+      const remote = await remotePromise;
+      if (!remote) throw new Error("offline");
       blob = remote.blob;
       version = remote.version;
       if (blob) {
@@ -364,7 +366,7 @@ export function VaultProvider({ children }: { children: React.ReactNode }) {
   const importEncrypted = async (blob: string, master: string) => {
     const salt = await secure.get(K.KDF_SALT);
     if (!salt) throw new Error("Salt missing");
-    const keys = deriveKeys(master, salt);
+    const keys = await deriveKeys(master, salt);
     const plain = decrypt(blob, keys);
     const v: Vault = JSON.parse(plain);
     await persistVault(v, keys, state.version);
