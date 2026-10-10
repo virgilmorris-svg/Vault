@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
+import { saveVaultExportFile } from "@/src/lib/exportFile";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useVault } from "@/src/lib/vault";
@@ -37,6 +38,26 @@ export default function DeleteAccountScreen() {
         setExported(true);
         setInfo({ title: t("exportCopied"), message: t("exportCopiedMsg"), kind: "success" });
       }
+    } catch (e: any) {
+      setInfo({ title: t("exportVault"), message: e?.message || "Export failed", kind: "error" });
+    }
+  };
+
+  const doExportFile = async () => {
+    if (!keys) {
+      setInfo({ title: t("exportVault"), message: t("exportNeedsUnlock"), kind: "error" });
+      return;
+    }
+    try {
+      const blob = await exportEncrypted();
+      if (!blob) return;
+      const r = await saveVaultExportFile(blob, user?.email);
+      if (r === "unavailable") {
+        setInfo({ title: t("exportVault"), message: t("exportFileUnavailable"), kind: "error" });
+        return;
+      }
+      setExported(true);
+      setInfo({ title: t("exportFileSaved"), message: r === "downloaded" ? t("exportFileDownloaded") : t("exportFileSavedMsg"), kind: "success" });
     } catch (e: any) {
       setInfo({ title: t("exportVault"), message: e?.message || "Export failed", kind: "error" });
     }
@@ -91,14 +112,18 @@ export default function DeleteAccountScreen() {
 
           <Pressable
             testID="delete-account-export"
-            onPress={doExport}
+            onPress={doExportFile}
             style={({ pressed }) => [styles.exportBtn, exported && styles.exportBtnDone, pressed && { opacity: 0.8 }]}
           >
             <Feather name={exported ? "check-circle" : "download"} size={18} color={exported ? theme.color.success : theme.color.brand} />
             <View style={{ flex: 1 }}>
-              <Text style={[styles.exportTitle, exported && { color: theme.color.success }]}>{exported ? t("exportCopied") : t("exportVault")}</Text>
+              <Text style={[styles.exportTitle, exported && { color: theme.color.success }]}>{exported ? t("exportFileSaved") : t("exportToFile")}</Text>
               <Text style={styles.exportHint}>{t("exportVaultHint")}</Text>
             </View>
+          </Pressable>
+          <Pressable onPress={doExport} style={({ pressed }) => [styles.clipBtn, pressed && { opacity: 0.7 }]} testID="delete-account-export-clipboard">
+            <Feather name="copy" size={14} color={theme.color.onSurfaceSecondary} />
+            <Text style={styles.clipText}>{t("exportToClipboard")}</Text>
           </Pressable>
 
           <Text style={styles.label}>{t("typeEmailToConfirm")}</Text>
@@ -212,6 +237,8 @@ const styles = StyleSheet.create({
   exportBtnDone: { borderColor: theme.color.success + "66" },
   exportTitle: { color: theme.color.brand, fontSize: 15, fontWeight: "700" },
   exportHint: { color: theme.color.onSurfaceTertiary, fontSize: 12, marginTop: 2, lineHeight: 16 },
+  clipBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 12, minHeight: 44 },
+  clipText: { color: theme.color.onSurfaceSecondary, fontSize: 13, fontWeight: "600" },
   label: { color: theme.color.onSurfaceSecondary, fontSize: 12, fontWeight: "600", marginTop: 20, marginBottom: 6 },
   input: {
     backgroundColor: theme.color.surfaceSecondary,

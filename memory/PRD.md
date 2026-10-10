@@ -46,3 +46,8 @@ Premium tier for family sharing (shared encrypted vault group) and unlimited dev
 - `unlockWithMaster` fetches the remote vault in parallel with the KDF instead of after it.
 - Startup SecureStore reads parallelized; animated splash shortened from ~2.1s to ~1.1s.
 - Lock screen shows "Déchiffrement du coffre…" while deriving keys.
+
+## Export to .vault file + lighter Android build — DONE
+- `src/lib/exportFile.ts`: `saveVaultExportFile(blob, email)` → native: writes `VauLt-<user>-<date>.vault` to cache via expo-file-system and opens the share sheet (expo-sharing); web: browser download.
+- Settings → Data: "Enregistrer en fichier .vault" + "Copier dans le presse-papiers". Delete-account screen: file export primary, clipboard secondary.
+- `app.json`: expo-build-properties with `enableProguardInReleaseBuilds` + `enableShrinkResourcesInReleaseBuilds` and keep rules for the app package (widget/autofill Kotlin), Hermes and JNI.

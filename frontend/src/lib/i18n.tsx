@@ -30,9 +30,9 @@ const translations = {
     deletePermanently: "Supprimer définitivement", deleting: "Suppression…", cancel: "Annuler",
     emailMismatch: "L’adresse e-mail ne correspond pas", accountDeleted: "Compte supprimé",
     accountDeletedMsg: "Votre compte et toutes vos données ont été supprimés.",
-    exportVault: "Exporter mon coffre", exportVaultHint: "Copie votre coffre chiffré dans le presse-papiers. Collez-le dans un endroit sûr : il restera illisible sans votre mot de passe maître.",
+    exportVault: "Exporter mon coffre", exportVaultHint: "Sauvegardez votre coffre chiffré (fichier .vault ou presse-papiers) en lieu sûr : il reste illisible sans votre mot de passe maître.",
     exportCopied: "Coffre chiffré copié", exportCopiedMsg: "Votre coffre chiffré est dans le presse-papiers. Collez-le dans un fichier ou une note sécurisée avant de continuer.",
-    exportNeedsUnlock: "Déverrouillez d’abord votre coffre pour pouvoir l’exporter.", decrypting: "Déchiffrement du coffre…",
+    exportNeedsUnlock: "Déverrouillez d’abord votre coffre pour pouvoir l’exporter.", decrypting: "Déchiffrement du coffre…", exportToFile: "Enregistrer en fichier .vault", exportToClipboard: "Copier dans le presse-papiers", exportFileSaved: "Fichier .vault prêt", exportFileSavedMsg: "Votre coffre chiffré a été enregistré en fichier .vault. Conservez-le dans un endroit sûr : il reste illisible sans votre mot de passe maître.", exportFileDownloaded: "Le fichier .vault a été téléchargé.", exportFileUnavailable: "Le partage de fichiers n’est pas disponible sur cet appareil. Utilisez la copie dans le presse-papiers.",
   },
   en: {
     signIn: "Sign in", createAccount: "Create account", email: "Email", accountPassword: "Account password",
@@ -57,9 +57,9 @@ const translations = {
     deletePermanently: "Delete permanently", deleting: "Deleting…", cancel: "Cancel",
     emailMismatch: "E-mail address does not match", accountDeleted: "Account deleted",
     accountDeletedMsg: "Your account and all your data have been deleted.",
-    exportVault: "Export my vault", exportVaultHint: "Copies your encrypted vault to the clipboard. Paste it somewhere safe: it stays unreadable without your master password.",
+    exportVault: "Export my vault", exportVaultHint: "Back up your encrypted vault (.vault file or clipboard) somewhere safe: it stays unreadable without your master password.",
     exportCopied: "Encrypted vault copied", exportCopiedMsg: "Your encrypted vault is in the clipboard. Paste it into a file or secure note before continuing.",
-    exportNeedsUnlock: "Unlock your vault first to export it.", decrypting: "Decrypting vault…",
+    exportNeedsUnlock: "Unlock your vault first to export it.", decrypting: "Decrypting vault…", exportToFile: "Save as .vault file", exportToClipboard: "Copy to clipboard", exportFileSaved: ".vault file ready", exportFileSavedMsg: "Your encrypted vault was saved as a .vault file. Keep it somewhere safe: it stays unreadable without your master password.", exportFileDownloaded: "The .vault file has been downloaded.", exportFileUnavailable: "File sharing is not available on this device. Use the clipboard copy instead.",
   },
   es: {
     signIn: "Iniciar sesión", createAccount: "Crear cuenta", email: "Correo electrónico", accountPassword: "Contraseña de la cuenta",
@@ -84,9 +84,9 @@ const translations = {
     deletePermanently: "Eliminar definitivamente", deleting: "Eliminando…", cancel: "Cancelar",
     emailMismatch: "El correo electrónico no coincide", accountDeleted: "Cuenta eliminada",
     accountDeletedMsg: "Tu cuenta y todos tus datos han sido eliminados.",
-    exportVault: "Exportar mi bóveda", exportVaultHint: "Copia tu bóveda cifrada al portapapeles. Pégala en un lugar seguro: seguirá siendo ilegible sin tu contraseña maestra.",
+    exportVault: "Exportar mi bóveda", exportVaultHint: "Guarda tu bóveda cifrada (archivo .vault o portapapeles) en un lugar seguro: sigue siendo ilegible sin tu contraseña maestra.",
     exportCopied: "Bóveda cifrada copiada", exportCopiedMsg: "Tu bóveda cifrada está en el portapapeles. Pégala en un archivo o nota segura antes de continuar.",
-    exportNeedsUnlock: "Desbloquea primero tu bóveda para exportarla.", decrypting: "Descifrando la bóveda…",
+    exportNeedsUnlock: "Desbloquea primero tu bóveda para exportarla.", decrypting: "Descifrando la bóveda…", exportToFile: "Guardar como archivo .vault", exportToClipboard: "Copiar al portapapeles", exportFileSaved: "Archivo .vault listo", exportFileSavedMsg: "Tu bóveda cifrada se guardó como archivo .vault. Guárdalo en un lugar seguro: sigue siendo ilegible sin tu contraseña maestra.", exportFileDownloaded: "El archivo .vault se ha descargado.", exportFileUnavailable: "Compartir archivos no está disponible en este dispositivo. Usa la copia al portapapeles.",
   },
 } as const;
 

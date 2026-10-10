@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import { useVault } from "@/src/lib/vault";
 import { theme } from "@/src/lib/theme";
 import { sessionsApi } from "@/src/lib/api";
+import { saveVaultExportFile } from "@/src/lib/exportFile";
 import { InfoModal } from "@/src/components/InfoModal";
 import { useLanguage, type Language } from "@/src/lib/i18n";
 
@@ -118,11 +119,25 @@ export default function SettingsScreen() {
   };
 
   const doExport = async () => {
+    if (!keys) { showModal(t("exportVault"), t("exportNeedsUnlock"), "error"); return; }
     const blob = await exportEncrypted();
     if (blob) {
       await Clipboard.setStringAsync(blob);
       setExported(blob);
       setTimeout(() => setExported(null), 3000);
+    }
+  };
+
+  const doExportFile = async () => {
+    if (!keys) { showModal(t("exportVault"), t("exportNeedsUnlock"), "error"); return; }
+    try {
+      const blob = await exportEncrypted();
+      if (!blob) return;
+      const r = await saveVaultExportFile(blob, user?.email);
+      if (r === "unavailable") showModal(t("exportVault"), t("exportFileUnavailable"), "error");
+      else if (r === "downloaded") showModal(t("exportFileSaved"), t("exportFileDownloaded"), "success");
+    } catch (e: any) {
+      showModal(t("exportVault"), e?.message || "Export failed", "error");
     }
   };
 
@@ -266,13 +281,19 @@ export default function SettingsScreen() {
 
         <Section title="Data">
           <Row
-            icon="download"
-            label="Export encrypted vault"
+            icon="file-text"
+            label={t("exportToFile")}
+            onPress={doExportFile}
+            testID="settings-export-file"
+          />
+          <Row
+            icon="copy"
+            label={t("exportToClipboard")}
             valueText={exported ? "Copied" : undefined}
             onPress={doExport}
             testID="settings-export"
           />
-          <Text style={styles.hint}>Export copies your encrypted vault to the clipboard. It stays useless without the master password.</Text>
+          <Text style={styles.hint}>{t("exportVaultHint")}</Text>
         </Section>
 
         <Section title={`Sessions (${sessions.length})`}>
