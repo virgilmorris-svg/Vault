@@ -5,6 +5,7 @@
 // on low-end Android devices. Output is byte-identical to the previous crypto-js
 // implementation, so existing vaults keep decrypting.
 import CryptoJS from "crypto-js";
+import * as ExpoCrypto from "expo-crypto";
 import { pbkdf2Async } from "@noble/hashes/pbkdf2.js";
 import { sha256 } from "@noble/hashes/sha2.js";
 import { bytesToHex } from "@noble/hashes/utils.js";
@@ -17,9 +18,18 @@ export type KeyMaterial = {
   hmacKeyHex: string;
 };
 
+function secureRandomWordArray(len: number) {
+  const bytes = ExpoCrypto.getRandomBytes(len);
+  const words: number[] = [];
+  for (let i = 0; i < bytes.length; i++) {
+    const wordIndex = i >>> 2;
+    words[wordIndex] = (words[wordIndex] || 0) | (bytes[i] << (24 - (i % 4) * 8));
+  }
+  return CryptoJS.lib.WordArray.create(words, bytes.length);
+}
+
 export function randomBytesB64(len: number): string {
-  const words = CryptoJS.lib.WordArray.random(len);
-  return CryptoJS.enc.Base64.stringify(words);
+  return CryptoJS.enc.Base64.stringify(secureRandomWordArray(len));
 }
 
 export function randomSaltB64(): string {
@@ -56,7 +66,7 @@ export async function deriveKeys(masterPassword: string, saltB64: string): Promi
  * Encrypt plaintext string. Returns a JSON envelope with iv, ct, and mac.
  */
 export function encrypt(plaintext: string, keys: KeyMaterial): string {
-  const iv = CryptoJS.lib.WordArray.random(16);
+  const iv = secureRandomWordArray(16);
   const aesKey = CryptoJS.enc.Hex.parse(keys.aesKeyHex);
   const cipher = CryptoJS.AES.encrypt(plaintext, aesKey, {
     iv,
