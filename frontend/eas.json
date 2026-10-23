@@ -7,6 +7,9 @@
       "node": "20.19.4",
       "autoIncrement": true,
       "distribution": "store",
+      "env": {
+        "EXPO_PUBLIC_BACKEND_URL": "https://vault54500.duckdns.org"
+      },
       "android": {
         "buildType": "app-bundle",
         "gradleCommand": ":app:bundleRelease"
@@ -15,6 +18,9 @@
     "preview": {
       "node": "20.19.4",
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_BACKEND_URL": "https://vault54500.duckdns.org"
+      },
       "android": {
         "buildType": "apk",
         "gradleCommand": ":app:assembleRelease"

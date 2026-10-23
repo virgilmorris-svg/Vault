@@ -1,0 +1,4 @@
+vault54500.duckdns.org {
+    encode zstd gzip
+    reverse_proxy backend:8000
+}
