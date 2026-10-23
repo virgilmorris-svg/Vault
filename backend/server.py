@@ -179,7 +179,7 @@ async def _init():
     await db.sessions.create_index("token_hash", unique=True)
     await db.sessions.create_index("expires_at", expireAfterSeconds=0)
     await db.vaults.create_index("user_id", unique=True)
-    await db.files.create_index([("user_id", 1), ("file_id", 1)], unique=True)
+    await db.files.create_index([("user_id", 1), ("file_id", 1)])
     log.info("SentinelPass API ready; local encrypted storage at %s", STORAGE_ROOT)
 
 
