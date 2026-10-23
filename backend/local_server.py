@@ -3,6 +3,8 @@ import mimetypes
 import os
 from pathlib import Path
 
+from starlette.responses import JSONResponse
+
 import server
 
 # Store encrypted media directly on the VPS instead of Emergent object storage.
@@ -34,9 +36,20 @@ def _get_local_object(path: str):
     return target.read_bytes(), content_type
 
 
-# Disable Emergent storage initialization and replace the storage functions used by server.py.
+# Disable Emergent object storage and replace storage functions used by server.py.
+# Emergent remains used only by the Google sign-in flow in server.py.
 server.EMERGENT_KEY = None
 server._put_object = _put_local_object
 server._get_object = _get_local_object
+
+
+# The original backend exposes a HaveIBeenPwned route. The self-hosted deployment
+# deliberately blocks it so runtime traffic cannot leave IONOS except for Google sign-in.
+@server.app.middleware("http")
+async def block_external_breach_lookup(request, call_next):
+    if request.url.path == "/api/breach/check":
+        return JSONResponse({"detail": "External breach checks are disabled"}, status_code=404)
+    return await call_next(request)
+
 
 app = server.app
