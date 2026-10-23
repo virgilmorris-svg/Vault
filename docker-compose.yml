@@ -18,7 +18,9 @@ services:
       MONGO_URL: mongodb://mongo:27017
       DB_NAME: sentinelpass_db
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env file}
-      EMERGENT_LLM_KEY: ${EMERGENT_LLM_KEY:?Set EMERGENT_LLM_KEY in the root .env file}
+      LOCAL_STORAGE_DIR: /data/storage
+    volumes:
+      - media_data:/data/storage
     depends_on:
       mongo:
         condition: service_healthy
@@ -38,6 +40,7 @@ services:
 
 volumes:
   mongo_data:
+  media_data:
 
 networks:
   traefik-net:
