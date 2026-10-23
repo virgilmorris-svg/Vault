@@ -135,7 +135,7 @@ export default function AuthScreen() {
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
         <View style={styles.hero}>
           <Image
-            source={{ uri: "https://images.unsplash.com/photo-1727174432128-9311917465bf?crop=entropy&cs=srgb&fm=jpg&q=85&w=1200" }}
+            source={require("../assets/images/splash-image.png")}
             style={StyleSheet.absoluteFillObject}
             contentFit="cover"
           />
