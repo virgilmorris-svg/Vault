@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View, Text, TextInput, Pressable, StyleSheet, KeyboardAvoidingView, Platform,
   ScrollView, ActivityIndicator,
 } from "react-native";
 import * as WebBrowser from "expo-web-browser";
-import * as Linking from "expo-linking";
+import * as Google from "expo-auth-session/providers/google";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
 import { Feather } from "@expo/vector-icons";
@@ -17,6 +17,8 @@ import { useLanguage, type Language } from "@/src/lib/i18n";
 WebBrowser.maybeCompleteAuthSession();
 
 type Mode = "signin" | "signup";
+
+const GOOGLE_ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID || "";
 
 export default function AuthScreen() {
   const router = useRouter();
@@ -31,73 +33,56 @@ export default function AuthScreen() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const processedSessionId = React.useRef<Set<string>>(new Set());
+  const processedGoogleToken = useRef<Set<string>>(new Set());
 
-  const processSessionId = async (sid: string) => {
-    if (processedSessionId.current.has(sid)) return;
-    processedSessionId.current.add(sid);
-    setLoading(true);
-    setErr(null);
-    try {
-      const user = await (vault as any).loginWithSessionId(sid);
-      if (user?.kdf_salt) {
-        router.replace("/lock");
-      } else {
-        router.replace("/google-setup");
-      }
-    } catch (e: any) {
-      setErr(e.message || "Google sign-in failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // On Android, Expo AuthSession uses the installed-app authorization-code flow with PKCE,
+  // then exchanges the code directly with Google and returns an ID token.
+  const [googleRequest, googleResponse, promptGoogle] = Google.useIdTokenAuthRequest({
+    androidClientId: GOOGLE_ANDROID_CLIENT_ID || "google-client-id-not-configured.apps.googleusercontent.com",
+    selectAccount: true,
+  });
 
-  // Web: parse session_id from URL on mount
   useEffect(() => {
-    if (Platform.OS !== "web") return;
-    try {
-      const hash = window.location.hash || "";
-      const search = window.location.search || "";
-      const m = (hash + search).match(/session_id=([^&]+)/);
-      if (m) {
-        const sid = decodeURIComponent(m[1]);
-        // Clean URL
-        window.history.replaceState(window.history.state, "", window.location.pathname);
-        processSessionId(sid);
+    const completeGoogleSignIn = async () => {
+      if (!googleResponse) return;
+      if (googleResponse.type === "error") {
+        setErr(googleResponse.error?.message || "Google sign-in failed");
+        return;
       }
-    } catch {}
-  }, []);
+      if (googleResponse.type !== "success") return;
 
-  // Native: url listener + initial URL
-  useEffect(() => {
-    if (Platform.OS === "web") return;
-    const handle = (url: string | null) => {
-      if (!url) return;
-      const m = url.match(/[?#&]session_id=([^&#]+)/);
-      if (m) processSessionId(decodeURIComponent(m[1]));
+      const idToken = googleResponse.params?.id_token || googleResponse.authentication?.idToken;
+      if (!idToken || processedGoogleToken.current.has(idToken)) return;
+      processedGoogleToken.current.add(idToken);
+
+      setLoading(true);
+      setErr(null);
+      try {
+        // The state layer keeps this legacy method name for compatibility, but the value
+        // sent to the VPS is now a Google ID token, not an Emergent session ID.
+        const user = await (vault as any).loginWithSessionId(idToken);
+        if (user?.kdf_salt) {
+          router.replace("/lock");
+        } else {
+          router.replace("/google-setup");
+        }
+      } catch (e: any) {
+        setErr(e.message || "Google sign-in failed");
+      } finally {
+        setLoading(false);
+      }
     };
-    const sub = Linking.addEventListener("url", (e) => handle(e.url));
-    Linking.getInitialURL().then(handle);
-    return () => sub.remove();
-  }, []);
+    completeGoogleSignIn();
+  }, [googleResponse]);
 
   const googleSignIn = async () => {
     setErr(null);
+    if (!GOOGLE_ANDROID_CLIENT_ID) {
+      setErr("Google Sign-In is not configured yet.");
+      return;
+    }
     try {
-      const redirectUrl = Platform.OS === "web"
-        ? window.location.origin + "/"
-        : Linking.createURL("");
-      const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
-      if (Platform.OS === "web") {
-        window.location.href = authUrl;
-      } else {
-        const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
-        // Some Android flows return dismiss with no URL — url listener above will catch it
-        if (result.type === "success" && result.url) {
-          const m = result.url.match(/[?#&]session_id=([^&#]+)/);
-          if (m) await processSessionId(decodeURIComponent(m[1]));
-        }
-      }
+      await promptGoogle();
     } catch (e: any) {
       setErr(e.message || "Google sign-in failed");
     }
@@ -166,6 +151,7 @@ export default function AuthScreen() {
               </Pressable>
             ))}
           </View>
+
           <View style={styles.tabs} testID="auth-mode-tabs">
             <Pressable
               testID="tab-signin"
@@ -242,31 +228,22 @@ export default function AuthScreen() {
                 value={confirmMaster}
                 onChangeText={setConfirmMaster}
               />
-              <Text style={styles.notice}>
-                {t("masterLocal")}
-              </Text>
+              <Text style={styles.notice}>{t("masterLocal")}</Text>
             </>
           )}
 
-          {err && (
-            <Text style={styles.error} testID="auth-error">{err}</Text>
-          )}
+          {err && <Text style={styles.error} testID="auth-error">{err}</Text>}
 
           <Pressable
             testID="auth-submit"
             onPress={submit}
             disabled={loading}
-            style={({ pressed }) => [
-              styles.cta,
-              (pressed || loading) && { opacity: 0.85 },
-            ]}
+            style={({ pressed }) => [styles.cta, (pressed || loading) && { opacity: 0.85 }]}
           >
             {loading ? (
               <ActivityIndicator color={theme.color.onBrand} />
             ) : (
-              <Text style={styles.ctaText}>
-                {mode === "signup" ? t("createVault") : t("signIn")}
-              </Text>
+              <Text style={styles.ctaText}>{mode === "signup" ? t("createVault") : t("signIn")}</Text>
             )}
           </Pressable>
 
@@ -279,7 +256,11 @@ export default function AuthScreen() {
           <Pressable
             testID="auth-google"
             onPress={googleSignIn}
-            style={({ pressed }) => [styles.googleBtn, pressed && { opacity: 0.7 }]}
+            disabled={loading || !googleRequest}
+            style={({ pressed }) => [
+              styles.googleBtn,
+              (pressed || loading || !googleRequest) && { opacity: 0.6 },
+            ]}
           >
             <Feather name="chrome" size={18} color={theme.color.onSurface} />
             <Text style={styles.googleText}>{t("signInWithGoogle")}</Text>
