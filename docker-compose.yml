@@ -18,7 +18,7 @@ services:
       MONGO_URL: mongodb://mongo:27017
       DB_NAME: sentinelpass_db
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env file}
-      GOOGLE_ANDROID_CLIENT_ID: ${GOOGLE_ANDROID_CLIENT_ID:-}
+      GOOGLE_ANDROID_CLIENT_ID: 196490481540-pvhdnj0a7jfq3pua1v6i9bgb9ednt74v.apps.googleusercontent.com
       LOCAL_STORAGE_DIR: /data/storage
     volumes:
       - media_data:/data/storage
