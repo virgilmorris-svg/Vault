@@ -5,7 +5,10 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "vault",
+    "scheme": [
+      "vault",
+      "com.emergent.securevaultsync.gbpwid"
+    ],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -13,7 +16,7 @@
       "bundleIdentifier": "com.emergent.securevaultsync.gbpwid"
     },
     "android": {
-      "versionCode": 2,
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#000000"
@@ -99,9 +102,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "aabae868-b57f-45fd-859c-a935453dd186"
+        "projectId": "bd1b44d1-1f29-42f2-b123-e1a304ba1a46"
       }
     },
-    "owner": "emergent-em-user-29414995-e1dd-4ab7-b102-04ca231cc252"
+    "owner": "vinz54"
   }
 }
