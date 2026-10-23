@@ -1,12 +1,11 @@
-import { useMemo, useState, useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, Pressable, ActivityIndicator } from "react-native";
+import { useMemo } from "react";
+import { View, Text, StyleSheet, ScrollView, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { useVault } from "@/src/lib/vault";
 import { theme } from "@/src/lib/theme";
 import { scorePassword } from "@/src/lib/passwords";
-import { checkPassword } from "@/src/lib/breach";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -15,67 +14,43 @@ export default function SecurityScreen() {
   const router = useRouter();
   const entries = vault?.entries || [];
   const logins = entries.filter((e) => e.category === "login" && e.password);
-  const [breaches, setBreaches] = useState<Record<string, number>>({});
-  const [scanning, setScanning] = useState(false);
-
-  const scanBreaches = async () => {
-    if (scanning || logins.length === 0) return;
-    setScanning(true);
-    const results: Record<string, number> = {};
-    for (const l of logins) {
-      try {
-        const c = await checkPassword(l.password!);
-        results[l.id] = c;
-      } catch {
-        results[l.id] = 0;
-      }
-    }
-    setBreaches(results);
-    setScanning(false);
-  };
-
-  useEffect(() => {
-    // auto-scan on first mount if we have logins
-    if (logins.length > 0 && Object.keys(breaches).length === 0) scanBreaches();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logins.length]);
 
   const analysis = useMemo(() => {
     const weak: typeof logins = [];
     const reused: typeof logins = [];
     const old: typeof logins = [];
-    const breached: typeof logins = [];
     const pwCount: Record<string, number> = {};
+
     logins.forEach((e) => {
       pwCount[e.password!] = (pwCount[e.password!] || 0) + 1;
     });
+
     logins.forEach((e) => {
       const s = scorePassword(e.password!);
       if (s.score < 60) weak.push(e);
       if (pwCount[e.password!] > 1) reused.push(e);
       const ageDays = (Date.now() - new Date(e.updated_at).getTime()) / DAY_MS;
       if (ageDays > 365) old.push(e);
-      if ((breaches[e.id] || 0) > 0) breached.push(e);
     });
+
     let score = 100;
     if (logins.length) {
-      score -= Math.round((weak.length / logins.length) * 30);
-      score -= Math.round((reused.length / logins.length) * 25);
-      score -= Math.round((old.length / logins.length) * 15);
-      score -= Math.round((breached.length / logins.length) * 40);
+      score -= Math.round((weak.length / logins.length) * 45);
+      score -= Math.round((reused.length / logins.length) * 35);
+      score -= Math.round((old.length / logins.length) * 20);
     }
     score = Math.max(0, Math.min(100, score));
     const color = score >= 80 ? theme.color.success : score >= 50 ? theme.color.warning : theme.color.error;
     const status = score >= 80 ? "Excellent" : score >= 50 ? "Needs attention" : "At risk";
-    return { weak, reused, old, breached, score, color, status };
-  }, [logins, breaches]);
+    return { weak, reused, old, score, color, status };
+  }, [logins]);
 
   return (
     <SafeAreaView style={styles.c} edges={["top"]}>
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         <View style={styles.header}>
           <Text style={styles.title}>Security</Text>
-          <Text style={styles.sub}>Vault health & recommendations</Text>
+          <Text style={styles.sub}>Local vault health analysis</Text>
         </View>
 
         <View style={styles.scoreCard} testID="security-score-card">
@@ -84,23 +59,12 @@ export default function SecurityScreen() {
             <Text style={styles.scoreOutOf}>/ 100</Text>
           </View>
           <Text style={styles.scoreStatus}>{analysis.status}</Text>
-          <Text style={styles.scoreMeta}>{logins.length} login credentials analyzed</Text>
-          <Pressable onPress={scanBreaches} disabled={scanning || logins.length === 0} style={styles.rescanBtn} testID="security-rescan">
-            {scanning ? <ActivityIndicator size="small" color={theme.color.brand} /> : <Feather name="refresh-cw" size={14} color={theme.color.brand} />}
-            <Text style={styles.rescanText}>{scanning ? "Checking breaches…" : "Recheck breaches"}</Text>
-          </Pressable>
+          <Text style={styles.scoreMeta}>{logins.length} login credentials analyzed locally</Text>
+          <View style={styles.localBadge}>
+            <Feather name="smartphone" size={13} color={theme.color.brand} />
+            <Text style={styles.localBadgeText}>No password is sent to an external breach service</Text>
+          </View>
         </View>
-
-        <IssueCard
-          testID="issue-breached"
-          icon="alert-octagon"
-          title="Breached passwords"
-          desc="Found in known data breaches. Change these immediately."
-          count={analysis.breached.length}
-          color={theme.color.error}
-          entries={analysis.breached.map((e) => ({ ...e, meta: `${breaches[e.id]?.toLocaleString?.() || 0} occurrences` }))}
-          onEntry={(id) => router.push(`/entry/${id}`)}
-        />
 
         <IssueCard
           testID="issue-weak"
@@ -197,6 +161,8 @@ const styles = StyleSheet.create({
   scoreOutOf: { color: theme.color.onSurfaceTertiary, fontSize: 12, marginTop: -4 },
   scoreStatus: { color: theme.color.onSurface, fontSize: 18, fontWeight: "700", marginTop: 16 },
   scoreMeta: { color: theme.color.onSurfaceTertiary, fontSize: 12, marginTop: 4 },
+  localBadge: { marginTop: 12, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 7, borderRadius: 8, backgroundColor: theme.color.surfaceTertiary },
+  localBadgeText: { color: theme.color.onSurfaceTertiary, fontSize: 11, flexShrink: 1 },
   card: {
     marginHorizontal: 16, marginBottom: 12, padding: 16,
     backgroundColor: theme.color.surfaceSecondary, borderRadius: 12,
@@ -214,8 +180,6 @@ const styles = StyleSheet.create({
   },
   cardEntryTitle: { color: theme.color.onSurface, fontSize: 13, flex: 1 },
   cardEntryMeta: { color: theme.color.onSurfaceTertiary, fontSize: 11, marginTop: 2 },
-  rescanBtn: { marginTop: 12, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 8, backgroundColor: theme.color.surfaceTertiary },
-  rescanText: { color: theme.color.brand, fontSize: 12, fontWeight: "600" },
   moreText: { color: theme.color.onSurfaceTertiary, fontSize: 12, marginTop: 8, marginLeft: 10 },
   empty: { alignItems: "center", padding: 40, gap: 8 },
   emptyTitle: { color: theme.color.onSurface, fontSize: 16, fontWeight: "700", marginTop: 8 },
