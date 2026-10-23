@@ -24,22 +24,21 @@ services:
         condition: service_healthy
     expose:
       - "8000"
-
-  caddy:
-    image: caddy:2
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - backend
+    networks:
+      - default
+      - traefik-net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik-net"
+      - "traefik.http.routers.vault.rule=Host(`vault54500.duckdns.org`)"
+      - "traefik.http.routers.vault.entrypoints=websecure"
+      - "traefik.http.routers.vault.tls=true"
+      - "traefik.http.routers.vault.tls.certresolver=le"
+      - "traefik.http.services.vault.loadbalancer.server.port=8000"
 
 volumes:
   mongo_data:
-  caddy_data:
-  caddy_config:
+
+networks:
+  traefik-net:
+    external: true
